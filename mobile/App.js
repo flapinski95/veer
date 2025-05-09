@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from './styles';
-import Colors from './Colors'; // nazwij poprawnie plik!
+import styles from './styles/styles';
+import Colors from './styles/Colors'; // nazwij poprawnie plik!
 import ThemeSwitch from './components/themeSwitch';
 
 import {
@@ -9,15 +9,10 @@ import {
   StatusBar,
   Text,
   View,
+  
 } from 'react-native';
 
-import {
-  DebugInstructions,
 
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
 function Section({ children, title, theme }) {
   return (
@@ -50,28 +45,7 @@ function App() {
           <Text style={[styles.appTitle, { color: currentTheme.text, padding: safePadding }]}>
             Veer
           </Text>
-        </View>
-        <View
-          style={{
-            backgroundColor: currentTheme.surface,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One" theme={currentTheme}>
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes" theme={currentTheme}>
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug" theme={currentTheme}>
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More" theme={currentTheme}>
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
+        </View>      
       </ScrollView>
     </View>
   );

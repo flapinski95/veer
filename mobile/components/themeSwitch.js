@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Switch, Text } from 'react-native';
-import Colors from '../Colors';
+import Colors from '../styles/Colors';
 
 export default function ThemeSwitch({ theme, setTheme }) {
   const isDark = theme === Colors.dark;
