@@ -1,42 +1,31 @@
 import React from 'react';
 import styles from './styles';
+import Colors from './Colors'; // nazwij poprawnie plik!
+import ThemeSwitch from './components/themeSwitch';
+
 import {
   ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
   useColorScheme,
+  StatusBar,
+  Text,
   View,
 } from 'react-native';
 
 import {
-  Colors,
   DebugInstructions,
+
   Header,
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-function Section({ children, title }) {
-  const isDarkMode = useColorScheme() === 'dark';
+function Section({ children, title, theme }) {
   return (
     <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>
         {title}
       </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
+      <Text style={[styles.sectionDescription, { color: theme.text }]}>
         {children}
       </Text>
     </View>
@@ -44,41 +33,41 @@ function Section({ children, title }) {
 }
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const systemDarkMode = useColorScheme() === 'dark';
+  const [currentTheme, setCurrentTheme] = React.useState(systemDarkMode ? Colors.dark : Colors.light);
 
   const safePadding = '5%';
 
   return (
-    <View style={backgroundStyle}>
+    <View style={{ backgroundColor: currentTheme.background }}>
+      <ThemeSwitch theme={currentTheme} setTheme={setCurrentTheme} />
       <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+        barStyle={currentTheme.text === '#ffffff' ? 'light-content' : 'dark-content'}
+        backgroundColor={currentTheme.background}
       />
-      <ScrollView style={backgroundStyle}>
+      <ScrollView style={{ backgroundColor: currentTheme.background }}>
         <View style={{ paddingRight: safePadding }}>
-          <Header />
+          <Text style={[styles.appTitle, { color: currentTheme.text, padding: safePadding }]}>
+            Veer
+          </Text>
         </View>
         <View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            backgroundColor: currentTheme.surface,
             paddingHorizontal: safePadding,
             paddingBottom: safePadding,
           }}>
-          <Section title="Step One">
+          <Section title="Step One" theme={currentTheme}>
             Edit <Text style={styles.highlight}>App.js</Text> to change this
             screen and then come back to see your edits.
           </Section>
-          <Section title="See Your Changes">
+          <Section title="See Your Changes" theme={currentTheme}>
             <ReloadInstructions />
           </Section>
-          <Section title="Debug">
+          <Section title="Debug" theme={currentTheme}>
             <DebugInstructions />
           </Section>
-          <Section title="Learn More">
+          <Section title="Learn More" theme={currentTheme}>
             Read the docs to discover what to do next:
           </Section>
           <LearnMoreLinks />
@@ -87,7 +76,5 @@ function App() {
     </View>
   );
 }
-
-
 
 export default App;

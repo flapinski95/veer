@@ -1,11 +1,6 @@
 import { StyleSheet } from 'react-native';
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import Colors from './Colors'
+
 
 const styles = StyleSheet.create({
     sectionContainer: {
@@ -23,6 +18,13 @@ const styles = StyleSheet.create({
     },
     highlight: {
       fontWeight: '700',
+    },
+    appTitle: {
+      fontSize: 50,
+      fontWeight: '600',
+      color: Colors.dark,
+      textAlign: 'center',
+      marginTop: 40,
     },
   });
 export default styles;
