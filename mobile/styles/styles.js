@@ -22,9 +22,20 @@ const styles = StyleSheet.create({
     appTitle: {
       fontSize: 50,
       fontWeight: '600',
-      color: Colors.dark,
       textAlign: 'center',
       marginTop: 40,
     },
+    loginBox: {
+      borderRadius: 10,
+      padding: 20,
+      marginTop: 20,
+    },
+    typeBox: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 10,
+      marginBottom: 5,
+      backgroundColor: '#fff',
+    }
   });
 export default styles;
