@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, Button} from 'react-native';
+import {View, Text, StyleSheet, Button, Alert} from 'react-native';
 import styles from '../styles/styles';
 
 export default function RouteHomePage() {
