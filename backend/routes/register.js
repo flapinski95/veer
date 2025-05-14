@@ -76,7 +76,8 @@ router.post("/", async (req, res) => {
       { expiresIn: "1d" }
     );
     await user.update({ verificationToken });
-    const link = `${process.env.CLIENT_URL}/verify/${verificationToken}`;
+    //TODO
+    const link = `${process.env.CLIENT_URL}/api/register/verify/${verificationToken}`;
 
     await sendVerificationEmail(user.email, link);
 
