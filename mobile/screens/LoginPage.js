@@ -5,6 +5,7 @@ import ThemeSwitch from '../components/themeSwitch';
 import styles from '../styles/styles';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import axios from 'axios';
 
 const LoginSchema = Yup.object().shape({
     email: Yup.string()
@@ -36,6 +37,19 @@ export default function LoginPage({ navigation }) {
         validationSchema={LoginSchema}
         onSubmit={(values) => {
           console.log('Logging:', values);
+          body = {
+            login: values.email,
+            password: values.password
+          }
+          axios.post('http://localhost:3000/api/login', body)
+            .then(response => {
+              console.log('Login successful:', response.data);
+              // Handle successful login (e.g., navigate to home screen)
+            })
+            .catch(error => {
+              console.error('Login error:', error);
+              // Handle login error (e.g., show error message)
+            });
           navigation.navigate('Home');
         }}
       >
@@ -45,6 +59,10 @@ export default function LoginPage({ navigation }) {
               placeholder="Email or Username"
               onChangeText={handleChange('email')}
               onBlur={handleBlur('email')}
+              autoComplete="off"         // iOS: wyłącza silne hasła
+              textContentType="none"     // iOS: wyłącza sugestie
+              autoCorrect={false}        // Android/iOS: wyłącza autokorektę
+              autoCapitalize="none"
               value={values.email}
               style={styles.typeBox}
             />
@@ -57,6 +75,10 @@ export default function LoginPage({ navigation }) {
               secureTextEntry
               onChangeText={handleChange('password')}
               onBlur={handleBlur('password')}
+              autoComplete="off"         // iOS: wyłącza silne hasła
+              textContentType="none"     // iOS: wyłącza sugestie
+              autoCorrect={false}        // Android/iOS: wyłącza autokorektę
+              autoCapitalize="none"
               value={values.password}
               style={styles.typeBox}
             />

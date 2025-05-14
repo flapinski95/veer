@@ -6,6 +6,7 @@ import styles from '../styles/styles';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import CountryPicker from '../components/CountryPicker';
+import axios from 'axios';
 
 const RegisterSchema = Yup.object().shape({
   username: Yup.string()
@@ -67,8 +68,25 @@ export default function Register({ navigation }) {
               initialValues={{ username: '', name: '', surname: '', email: '', password: '', confirmPassword: '', country: '' }}
               validationSchema={RegisterSchema}
               onSubmit={(values) => {
-                console.log('Registering:', values);
-                navigation.navigate('Home');
+                console.log('Registering:', body);
+                body = {
+                  username: values.username,
+                  name: values.name,
+                  surname: values.surname,
+                  email: values.email,
+                  password: values.password,
+                  country: values.country
+                }
+                axios.post('http://localhost:3000/api/register', body)
+                  .then(response => {
+                    console.log('Registration successful:', response.data);
+                    navigation.navigate('Home');
+                  })
+                  .catch(error => {
+                    console.error('Registration error:', error);
+                    
+                  });
+                
               }}
             >
               {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
@@ -78,6 +96,10 @@ export default function Register({ navigation }) {
                       <TextInput
                         placeholder={field.placeholder}
                         onChangeText={handleChange(field.name)}
+                        autoComplete="off"         // iOS: wyłącza silne hasła
+                        textContentType="none"     // iOS: wyłącza sugestie
+                        autoCorrect={false}        // Android/iOS: wyłącza autokorektę
+                        autoCapitalize="none"
                         onBlur={handleBlur(field.name)}
                         value={values[field.name]}
                         style={styles.typeBox}
@@ -91,6 +113,10 @@ export default function Register({ navigation }) {
                     secureTextEntry
                     onChangeText={handleChange('password')}
                     onBlur={handleBlur('password')}
+                    autoComplete="off"         // iOS: wyłącza silne hasła
+                    textContentType="none"     // iOS: wyłącza sugestie
+                    autoCorrect={false}        // Android/iOS: wyłącza autokorektę
+                    autoCapitalize="none"
                     value={values.password}
                     style={styles.typeBox}
                   />
@@ -100,6 +126,10 @@ export default function Register({ navigation }) {
                     placeholder="Confirm Password"
                     secureTextEntry
                     onChangeText={handleChange('confirmPassword')}
+                    autoComplete="off"         // iOS: wyłącza silne hasła
+                    textContentType="none"     // iOS: wyłącza sugestie
+                    autoCorrect={false}        // Android/iOS: wyłącza autokorektę
+                    autoCapitalize="none"
                     onBlur={handleBlur('confirmPassword')}
                     value={values.confirmPassword}
                     style={styles.typeBox}

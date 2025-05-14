@@ -58,7 +58,7 @@ router.post("/", async (req, res) => {
       country,
     });
 
-    const accesToken = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "15m" }
@@ -92,7 +92,7 @@ router.post("/", async (req, res) => {
         country: user.country,
         isverified: user.isverified,
       },
-      accesToken,
+      accessToken,
       refreshToken,
     });
   } catch (error) {
