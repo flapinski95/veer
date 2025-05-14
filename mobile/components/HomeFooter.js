@@ -3,10 +3,12 @@ import styles from '../styles/styles';
 
 export default function HomeFooter() {
   return (
-    <View  style={styles.boxRow}>
+    <View style={styles.boxRow}>
       <Button
         title="Saved"
-        onPress={() => {navigation.navigate('Saved')}}
+        onPress={() => {
+          navigation.navigate('Saved');
+        }}
       />
       <Button
         title="Add"

@@ -18,8 +18,8 @@ export default function RouteHomePage() {
           width: '100%',
           padding: 16,
         }}>
-          <Text>Mapa</Text>
-        </View>
+        <Text>Mapa</Text>
+      </View>
       <View style={styles.boxRow}>
         <Button
           title="Like"

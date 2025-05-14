@@ -17,7 +17,9 @@ export default function RouteHomePage() {
           backgroundColor: 'red',
           width: '100%',
           padding: 16,
-        }}>Mapa</View>
+        }}>
+        Mapa
+      </View>
     </View>
   );
 }
