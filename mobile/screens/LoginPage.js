@@ -37,7 +37,7 @@ export default function LoginPage({ navigation }) {
         validationSchema={LoginSchema}
         onSubmit={(values) => {
           console.log('Logging:', values);
-          body = {
+          const body = {
             login: values.email,
             password: values.password
           }

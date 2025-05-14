@@ -68,8 +68,7 @@ export default function Register({ navigation }) {
               initialValues={{ username: '', name: '', surname: '', email: '', password: '', confirmPassword: '', country: '' }}
               validationSchema={RegisterSchema}
               onSubmit={(values) => {
-                console.log('Registering:', body);
-                body = {
+                const body = {
                   username: values.username,
                   name: values.name,
                   surname: values.surname,
@@ -77,6 +76,8 @@ export default function Register({ navigation }) {
                   password: values.password,
                   country: values.country
                 }
+                console.log('Registering:', body);
+                
                 axios.post('http://localhost:3000/api/register', body)
                   .then(response => {
                     console.log('Registration successful:', response.data);

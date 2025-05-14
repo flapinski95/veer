@@ -7,6 +7,7 @@ const axios = require("axios");
 const router = express.Router();
 const db = require("../models");
 const User = db.User;
+const sendVerificationEmail = require("../utils/sendMail");
 
 const {
   validateEmail,
@@ -112,7 +113,7 @@ router.get("/verify/:token", async (req, res) => {
     }
 
     await user.update({
-      isVerified: true,
+      isverified: true,
       verificationToken: null,
     });
 
