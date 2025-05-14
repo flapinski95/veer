@@ -29,16 +29,25 @@ module.exports = (sequelize, DataTypes) => {
       },
       country: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+      },
+      verificationToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       isverified: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+      },
+      googleId: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: true,
       },
     },
     {

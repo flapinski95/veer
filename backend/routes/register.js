@@ -16,9 +16,9 @@ const {
 
 router.post("/", async (req, res) => {
   try {
-    const { username, name, surname, email, password } = req.body;
+    const { username, name, surname, email, password, country } = req.body;
 
-    if (!username || !name || !surname || !email || !password) {
+    if (!username || !name || !surname || !email || !password || !country) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -27,7 +27,8 @@ router.post("/", async (req, res) => {
       containsMalicious(name) ||
       containsMalicious(surname) ||
       containsMalicious(email) ||
-      containsMalicious(password)
+      containsMalicious(password) ||
+      containsMalicious(country)
     ) {
       return res.status(400).json({ message: "Contains malicious" });
     }
@@ -54,30 +55,70 @@ router.post("/", async (req, res) => {
       surname,
       email,
       password: hashedPassword,
+      country,
     });
 
-    const token = jwt.sign(
+    const accesToken = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    const refreshToken = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    //TODO:
-    // await sendVerificationEmail(user.email, code);
+    const verificationToken = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+    await user.update({ verificationToken });
+    const link = `${process.env.CLIENT_URL}/verify/${verificationToken}`;
+
+    await sendVerificationEmail(user.email, link);
 
     res.status(201).json({
       message: "User registered successfully",
       user: {
         id: user.id,
         email: user.email,
-        favoriteDirectors: user.favoriteDirectors,
-        favoriteActors: user.favoriteActors,
-        favoriteGenres: user.favoriteGenres,
-        isVerified: user.isVerified,
+        username: user.username,
+        name: user.name,
+        surname: user.surname,
+        country: user.country,
+        isverified: user.isverified,
       },
-      token,
+      accesToken,
+      refreshToken,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.get("/verify/:token", async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({ where: { id: decoded.userId } });
+
+    if (!user || user.verificationToken !== token) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    await user.update({
+      isVerified: true,
+      verificationToken: null,
+    });
+
+    res.json({ message: "Account successfully verified" });
+  } catch (error) {
+    res.status(400).json({ message: "Invalid or expired token" });
+  }
+});
+
+module.exports = router;
