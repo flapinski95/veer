@@ -7,7 +7,7 @@ export default function HomeFooter() {
     <View  style={styles.buttonRow}>
       <Button
         title="Saved"
-        onPress={() => Alert.alert('Left button pressed')}
+        onPress={() => {navigation.navigate('Saved')}}
       />
       <Button
         title="Add"

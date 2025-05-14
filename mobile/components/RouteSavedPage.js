@@ -19,16 +19,6 @@ export default function RouteHomePage() {
           width: '400px',
           height: '400px',
         }}>Mapa</View>
-      <View style={styles.buttonRow}>
-        <Button
-          title="Like"
-          onPress={() => Alert.alert('Left button pressed')}
-        />
-        <Button
-          title="Dislike"
-          onPress={() => Alert.alert('Right button pressed')}
-        />
-      </View>
     </View>
   );
 }

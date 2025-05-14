@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeSwitch from '../components/themeSwitch';
