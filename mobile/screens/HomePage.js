@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeSwitch from '../components/themeSwitch';
-import TipHomePage from '../components/tip_home_page'
-import RouteHomePage from '../components/route_home_page'
+import RouteHomePage from '../components/RouteHomePage'
+import HomeFooter from '../components/HomeFooter'
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
@@ -11,8 +11,12 @@ export default function HomeScreen({ navigation }) {
     <View style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
       <ThemeSwitch />
       <Text style={{ color: colors.text, fontSize: 24 }}>Home Screen</Text>
-      {/* <TipHomePage /> */}
-      <RouteHomePage />
+      <View>
+        <RouteHomePage />
+        <RouteHomePage />
+        <RouteHomePage />
+      </View>
+      <HomeFooter/>
     </View>
   );
 }
