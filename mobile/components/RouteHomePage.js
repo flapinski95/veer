@@ -19,7 +19,7 @@ export default function RouteHomePage() {
           width: '400px',
           height: '400px',
         }}></View>
-      <View style={styles.fixToText}>
+      <View style={styles.buttonRow}>
         <Button
           title="Like"
           onPress={() => Alert.alert('Left button pressed')}

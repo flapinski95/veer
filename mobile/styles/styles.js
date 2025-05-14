@@ -36,6 +36,14 @@ const styles = StyleSheet.create({
       padding: 10,
       marginBottom: 5,
       backgroundColor: '#fff',
-    }
+    },
+    buttonsRow: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 16,
+      borderWidth: 1,
+      borderColor: '#ccc',
+    },
   });
 export default styles;

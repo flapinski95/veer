@@ -4,7 +4,7 @@ import styles from '../styles/styles';
 
 export default function HomeFooter() {
   return (
-    <View  style={styles.fixToText}>
+    <View  style={styles.buttonRow}>
       <Button
         title="Saved"
         onPress={() => Alert.alert('Left button pressed')}
