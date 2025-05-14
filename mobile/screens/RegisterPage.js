@@ -108,7 +108,7 @@ export default function Register({navigation}) {
                   .post('http://localhost:3000/api/register', body)
                   .then(response => {
                     console.log('Registration successful:', response.data);
-                    navigation.navigate('Home');
+                    navigation.navigate('VerificationLoadingScreen');
                   })
                   .catch(error => {
                     console.error('Registration error:', error);
