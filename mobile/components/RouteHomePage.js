@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from 'react-native';
+import styles from '../styles/styles';
 
 export default function RouteHomePage() {
     const test_tip_name = "Route 1"
