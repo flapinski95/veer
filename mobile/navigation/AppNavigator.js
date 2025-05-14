@@ -2,7 +2,6 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomePage from '../screens/HomePage';
 import SavedPage from '../screens/SavedPage';
-// import DetailsScreen from '../screens/DetailsScreen'
 import LoginPage from '../screens/LoginPage';
 import Register from '../screens/RegisterPage';
 
