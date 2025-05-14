@@ -1,7 +1,6 @@
 import { View, Text } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeSwitch from '../components/themeSwitch';
-import RouteHomePage from '../components/RouteHomePage'
 import HomeFooter from '../components/HomeFooter'
 
 export default function SavedPage({ navigation }) {
