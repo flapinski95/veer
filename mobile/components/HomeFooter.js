@@ -1,10 +1,9 @@
-import React from 'react';
-import {View, Text, Button, Alert} from 'react-native';
+import {View, Button, Alert} from 'react-native';
 import styles from '../styles/styles';
 
 export default function HomeFooter() {
   return (
-    <View  style={styles.buttonRow}>
+    <View  style={styles.boxRow}>
       <Button
         title="Saved"
         onPress={() => {navigation.navigate('Saved')}}

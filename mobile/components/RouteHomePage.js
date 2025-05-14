@@ -1,5 +1,4 @@
-import React from 'react';
-import {View, Text, StyleSheet, Button, Alert} from 'react-native';
+import {View, Text, Button, Alert} from 'react-native';
 import styles from '../styles/styles';
 
 export default function RouteHomePage() {
@@ -16,10 +15,12 @@ export default function RouteHomePage() {
       <View
         style={{
           backgroundColor: 'red',
-          width: '400px',
-          height: '400px',
-        }}>Mapa</View>
-      <View style={styles.buttonRow}>
+          width: '100%',
+          padding: 16,
+        }}>
+          <Text>Mapa</Text>
+        </View>
+      <View style={styles.boxRow}>
         <Button
           title="Like"
           onPress={() => Alert.alert('Left button pressed')}

@@ -8,16 +8,15 @@ export default function RouteHomePage() {
 
   return (
     <View style={{padding: '4px'}}>
-      <View
-        style={{padding: '4px', display: 'flex', justify_content: 'center'}}>
+      <View style={styles.boxRow}>
         <Text>{test_tip_name}</Text>
         <Text>{test_tip_user}</Text>
       </View>
       <View
         style={{
           backgroundColor: 'red',
-          width: '400px',
-          height: '400px',
+          width: '100%',
+          padding: 16,
         }}>Mapa</View>
     </View>
   );
