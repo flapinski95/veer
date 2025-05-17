@@ -17,6 +17,7 @@ import {Formik} from 'formik';
 import * as Yup from 'yup';
 import CountryPicker from '../components/CountryPicker';
 import axios from 'axios';
+import {IP} from '@env';
 
 const RegisterSchema = Yup.object().shape({
   username: Yup.string()
@@ -105,13 +106,21 @@ export default function Register({navigation}) {
                 console.log('Registering:', body);
 
                 axios
-                  .post('http://localhost:3000/api/register', body)
+                  .post(IP + '/api/register', body)
                   .then(response => {
                     console.log('Registration successful:', response.data);
-                    navigation.navigate('VerificationLoadingScreen');
+                    const userId = response.data.user.id;
+                    navigation.navigate('VerificationLoadingScreen', {userId});
                   })
                   .catch(error => {
-                    console.error('Registration error:', error);
+                    if (error.response) {
+                      console.error(
+                        '🔴 Registration error:',
+                        error.response.data,
+                      );
+                    } else {
+                      console.error('❌ Unknown error:', error.message);
+                    }
                   });
               }}>
               {({

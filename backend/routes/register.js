@@ -15,6 +15,7 @@ const {
   containsMalicious,
 } = require("../middleware/validateInput");
 
+module.exports = (io) => {
 router.post("/", async (req, res) => {
   try {
     const { username, name, surname, email, password, country } = req.body;
@@ -117,10 +118,13 @@ router.get("/verify/:token", async (req, res) => {
       verificationToken: null,
     });
 
+    io.to(decoded.userId).emit('verified');
+
     res.json({ message: "Account successfully verified" });
   } catch (error) {
     res.status(400).json({ message: "Invalid or expired token" });
   }
 });
+return router
 
-module.exports = router;
+}
