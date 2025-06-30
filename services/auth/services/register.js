@@ -9,8 +9,8 @@ async function registerUser({ username, email, password, country, firstName, las
         email,
         firstName,
         lastName,
-        enabled: true,
-        emailVerified: true,
+        // enabled: true,
+        emailVerified: true, //todo
         attributes: {
           country: [country],
         },

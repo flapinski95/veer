@@ -55,6 +55,7 @@ services:
     container_name: veer-keycloak
     command:
       - start-dev
+      - --features=preview
       - --hostname-strict=false
     environment:
       KEYCLOAK_ADMIN: admin
