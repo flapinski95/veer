@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>MyApp</string>
+	<string>TestApp</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -23,9 +23,11 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.veer.app</string>
+				<string>veer</string>
 			</array>
 		</dict>
 	</array>
@@ -33,17 +35,30 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>MBXAccessToken</key>
-	<string>pk.eyJ1IjoiNnIxbSIsImEiOiJjbWFza3VucW0waXllMm1zMmo4Y2M5d3BuIn0.d_ga4-N0QnkvKHSJy8HqaA</string>
 	<key>NSAppTransportSecurity</key>
-	<dict>
+		<dict>
 		<key>NSAllowsArbitraryLoads</key>
-		<false/>
-		<key>NSAllowsLocalNetworking</key>
 		<true/>
-	</dict>
+		<!-- albo bezpieczniej per-host: -->
+		<!--
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>192.168.0.82</key>
+			<dict>
+			<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+			<true/>
+			<key>NSIncludesSubdomains</key>
+			<true/>
+			</dict>
+		</dict>
+		-->
+		</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Potrzebujemy lokalizacji, aby pokazać Twoją pozycję na mapie.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to show your position on the map.</string>
+	<string>Potrzebujemy lokalizacji, aby pokazać Twoją pozycję na mapie.</string>
+	<key>RCTNewArchEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

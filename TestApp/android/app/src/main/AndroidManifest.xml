@@ -10,8 +10,6 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
-      <meta-data android:name="MAPBOX_ACCESS_TOKEN"
-           android:value="pk.eyJ1IjoiNnIxbSIsImEiOiJjbWFza3VucW0waXllMm1zMmo4Y2M5d3BuIn0.d_ga4-N0QnkvKHSJy8HqaA" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
@@ -23,15 +21,8 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
-
-        <intent-filter android:autoVerify="true">
-          <action android:name="android.intent.action.VIEW" />
-          <category android:name="android.intent.category.DEFAULT" />
-          <category android:name="android.intent.category.BROWSABLE" />
-          <data android:scheme="com.veer.app" android:host="callback" />
-        </intent-filter>
       </activity>
+      <meta-data android:name="appAuthRedirectScheme" android:value="veer" />
 
     </application>
-
 </manifest>
