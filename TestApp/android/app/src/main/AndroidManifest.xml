@@ -22,5 +22,7 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      <meta-data android:name="appAuthRedirectScheme" android:value="veer" />
+
     </application>
 </manifest>
