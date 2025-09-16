@@ -20,19 +20,43 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>veer</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
-	<dict>
+		<dict>
 		<key>NSAllowsArbitraryLoads</key>
-		<false/>
-		<key>NSAllowsLocalNetworking</key>
 		<true/>
-	</dict>
+		<!-- albo bezpieczniej per-host: -->
+		<!--
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>192.168.0.82</key>
+			<dict>
+			<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+			<true/>
+			<key>NSIncludesSubdomains</key>
+			<true/>
+			</dict>
+		</dict>
+		-->
+		</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Potrzebujemy lokalizacji, aby pokazać Twoją pozycję na mapie.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Potrzebujemy lokalizacji, aby pokazać Twoją pozycję na mapie.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -49,9 +73,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Potrzebujemy lokalizacji, aby pokazać Twoją pozycję na mapie.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Potrzebujemy lokalizacji, aby pokazać Twoją pozycję na mapie.</string>
 </dict>
 </plist>

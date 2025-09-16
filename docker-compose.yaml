@@ -57,6 +57,7 @@ services:
       - start-dev
       - --features=preview
       - --hostname-strict=false
+      - --proxy-headers=xforwarded
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: secret
