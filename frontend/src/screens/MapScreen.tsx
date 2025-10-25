@@ -19,7 +19,8 @@ import Mapbox, {
   UserTrackingMode,
 } from '@rnmapbox/maps';
 
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
+const token = MAPBOX_ACCESS_TOKEN ?? '';
+Mapbox.setAccessToken(token);
 
 type LngLat = [number, number]; // [lng, lat]
 
