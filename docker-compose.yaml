@@ -58,6 +58,7 @@ services:
       - --features=preview
       - --hostname-strict=false
       - --proxy-headers=xforwarded
+      - --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: secret
@@ -65,6 +66,8 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: secret
+    volumes:
+      - ./services/keycloak/export:/opt/keycloak/data/import
     ports:
       - "8180:8080"
     depends_on:
