@@ -1,8 +1,16 @@
 // src/screens/MapScreen.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, TextInput, FlatList, Pressable, Text, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  FlatList,
+  Pressable,
+  Text,
+  Platform,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MAPBOX_TOKEN } from '@env';
+import { MAPBOX_ACCESS_TOKEN } from '@env';
 import Mapbox, {
   MapView,
   Camera,
@@ -11,7 +19,7 @@ import Mapbox, {
   UserTrackingMode,
 } from '@rnmapbox/maps';
 
-Mapbox.setAccessToken(MAPBOX_TOKEN);
+Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 type LngLat = [number, number]; // [lng, lat]
 
@@ -43,18 +51,27 @@ export default function MapScreen() {
   // Debounce search
   useEffect(() => {
     if (!isResultsOpen) return;
-    const t = setTimeout(() => { void search(query); }, 300);
+    const t = setTimeout(() => {
+      void search(query);
+    }, 300);
     return () => clearTimeout(t);
   }, [query, userLngLat, isResultsOpen]);
 
   const search = async (q: string) => {
-    if (!q.trim()) { setResults([]); return; }
+    if (!q.trim()) {
+      setResults([]);
+      return;
+    }
     try {
       setLoading(true);
-      const prox = userLngLat ? `&proximity=${userLngLat[0]},${userLngLat[1]}` : '';
+      const prox = userLngLat
+        ? `&proximity=${userLngLat[0]},${userLngLat[1]}`
+        : '';
       const url =
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json` +
-        `?access_token=${MAPBOX_TOKEN}&limit=6&autocomplete=true&language=pl${prox}`;
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          q,
+        )}.json` +
+        `?access_token=${MAPBOX_ACCESS_TOKEN}&limit=6&autocomplete=true&language=pl${prox}`;
       const res = await fetch(url);
       const data = await res.json();
       const feats: GeoFeature[] = (data.features ?? []).map((f: any) => ({
@@ -71,8 +88,8 @@ export default function MapScreen() {
   };
 
   const goTo = (lngLat: LngLat) => {
-    setFollowUser(false);              // przestań śledzić użytkownika
-    setSelectedCoord(lngLat);          // pokaż pinezkę w wybranym miejscu
+    setFollowUser(false); // przestań śledzić użytkownika
+    setSelectedCoord(lngLat); // pokaż pinezkę w wybranym miejscu
     requestAnimationFrame(() => {
       camRef.current?.setCamera({
         centerCoordinate: lngLat,
@@ -84,9 +101,9 @@ export default function MapScreen() {
 
   const onPick = (f: GeoFeature) => {
     setQuery(f.place_name);
-    setIsResultsOpen(false);          // zamknij panel wyników
-    setResults([]);                   // czyść wyniki
-    inputRef.current?.blur();         // schowaj klawiaturę
+    setIsResultsOpen(false); // zamknij panel wyników
+    setResults([]); // czyść wyniki
+    inputRef.current?.blur(); // schowaj klawiaturę
     goTo(f.center);
   };
 
@@ -145,9 +162,9 @@ export default function MapScreen() {
           ref={inputRef}
           value={query}
           onFocus={() => setIsResultsOpen(true)}
-          onChangeText={(t) => {
+          onChangeText={t => {
             setQuery(t);
-            setIsResultsOpen(!!t.trim());  // tylko gdy coś wpisane
+            setIsResultsOpen(!!t.trim()); // tylko gdy coś wpisane
           }}
           placeholder="Search place…"
           placeholderTextColor="#00000080"
@@ -160,10 +177,13 @@ export default function MapScreen() {
           <View style={styles.resultsBox}>
             <FlatList
               data={results}
-              keyExtractor={(it) => it.id}
+              keyExtractor={it => it.id}
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
-                <Pressable style={styles.resultRow} onPress={() => onPick(item)}>
+                <Pressable
+                  style={styles.resultRow}
+                  onPress={() => onPick(item)}
+                >
                   <Text numberOfLines={2} style={styles.resultText}>
                     {item.place_name}
                   </Text>
@@ -188,7 +208,10 @@ function createStyles(topInset: number) {
       right: 12,
     },
     searchInput: {
-      backgroundColor: Platform.select({ ios: '#FFFFFFF2', android: '#FFFFFFF2' }) as string,
+      backgroundColor: Platform.select({
+        ios: '#FFFFFFF2',
+        android: '#FFFFFFF2',
+      }) as string,
       borderRadius: 12,
       paddingHorizontal: 14,
       paddingVertical: Platform.select({ ios: 12, android: 10 }) as number,
