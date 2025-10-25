@@ -2,7 +2,7 @@
 import { HOST } from '@env';
 
 export const oidc = {
-  issuer: `http://${HOST}:8088/realms/veer`,
+  issuer: `http://${HOST}:8180/realms/veer`,
   clientId: 'veer-mobile',
   clientSecret: '',              // ⬅️ WAŻNE: pusty string, nigdy null/undefined
   redirectUrl: 'veer://callback',
