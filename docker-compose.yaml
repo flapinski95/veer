@@ -11,7 +11,7 @@ services:
       - "25432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./postgres/init:/docker-entrypoint-initdb.d
+      - ./services/postgres/init:/docker-entrypoint-initdb.d
     networks:
       - veer
     healthcheck:
@@ -20,35 +20,35 @@ services:
       timeout: 5s
       retries: 5
 
-  mongo:
-    image: mongo:6
-    container_name: veer-mongo
-    restart: unless-stopped
-    ports:
-      - "27028:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - veer
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # mongo:
+  #   image: mongo:6
+  #   container_name: veer-mongo
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27028:27017"
+  #   volumes:
+  #     - mongo-data:/data/db
+  #   networks:
+  #     - veer
+  #   healthcheck:
+  #     test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
-  redis:
-    image: redis:7
-    container_name: veer-redis
-    restart: unless-stopped
-    ports:
-      - "6389:6379"
-    networks:
-      - veer
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+  # redis:
+  #   image: redis:7
+  #   container_name: veer-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6389:6379"
+  #   networks:
+  #     - veer
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
@@ -118,4 +118,4 @@ networks:
 
 volumes:
   postgres-data:
-  mongo-data:
+  # mongo-data:
