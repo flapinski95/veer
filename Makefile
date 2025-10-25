@@ -1,6 +1,6 @@
 KEYCLOAK_CONTAINER=veer-keycloak
 
-EXPORT_PATH=/opt/services/keycloak/data/export
+EXPORT_PATH=/opt/keycloak/data/export
 
 EXPORT_FILE=veer-realm.json
 
