@@ -1,15 +1,12 @@
-FROM node:18-alpine AS builder
+FROM maven:3.8.4-openjdk-17 AS build
 WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src ./src
+RUN mvn package -DskipTests
 
-COPY package*.json ./
-RUN npm install --omit=dev
-COPY . .
-
-FROM node:18-alpine
+FROM openjdk:17-jdk-slim
 WORKDIR /app
-
-COPY --from=builder /app .
-ENV NODE_ENV=production
+COPY --from=build /app/target/gateway-0.0.1-SNAPSHOT.jar .
 EXPOSE 3001
-
-CMD ["node", "src/index.js"]
+CMD ["java", "-jar", "gateway-0.0.1-SNAPSHOT.jar"]
