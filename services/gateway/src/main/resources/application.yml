@@ -13,4 +13,14 @@ management:
     web:
       exposure:
         include: health
+  metrics:
+    binders:
+      processor:
+        enabled: false
+
+services:
+  auth:
+    uri: http://auth-service:3002
+  user:
+    uri: http://user-service:3003
 
