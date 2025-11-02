@@ -1,0 +1,26 @@
+server:
+  port: 3001
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/veer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  metrics:
+    binders:
+      processor:
+        enabled: false
+
+services:
+  auth:
+    uri: http://auth-service:3002
+  user:
+    uri: http://user-service:3003
+

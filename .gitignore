@@ -1,5 +1,4 @@
 #
-backend/.env
 backend/package-lock.json
 
 # Logs
@@ -71,7 +70,6 @@ web_modules/
 .node_repl_history
 
 # Output of 'npm pack'
-*.tgz
 
 # Yarn Integrity file
 .yarn-integrity
@@ -141,3 +139,5 @@ dist
 
 # macOS
 .DS_Store
+
+target/
