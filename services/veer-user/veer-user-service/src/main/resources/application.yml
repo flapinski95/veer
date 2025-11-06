@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: veer-user-service
+
+server:
+  port: 3002
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
