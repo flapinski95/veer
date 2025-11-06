@@ -45,7 +45,7 @@ public class User {
 
     @ManyToMany(fetch = FetchType.LAZY) // don't fetch until needed
     @JoinTable(
-        name = "user_relationships",
+        name = "followers",
         joinColumns = @JoinColumn(name = "follower_id"),
         inverseJoinColumns = @JoinColumn(name = "followed_id"))
     @Builder.Default
