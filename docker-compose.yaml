@@ -86,19 +86,6 @@ services:
     networks:
       - veer
 
-  auth-service:
-    build: ./services/auth
-    container_name: veer-auth
-    restart: always
-    ports:
-      - "3102:3002"
-    env_file:
-      - ./services/auth/.env
-    depends_on:
-      - keycloak
-    networks:
-      - veer
-
   nginx:
     image: nginx:alpine
     container_name: veer-nginx

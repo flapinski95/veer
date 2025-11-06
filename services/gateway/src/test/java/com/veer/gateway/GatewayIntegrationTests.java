@@ -100,17 +100,6 @@ class GatewayIntegrationTests {
     }
 
     @Test
-    void requestToAuthRoute_shouldBeProxiedWithoutAuth() throws InterruptedException {
-        webTestClient.get().uri("/api/auth/health")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class).isEqualTo("OK");
-
-        assertThat(lastProxiedRequest).isNotNull();
-        assertThat(lastProxiedRequest.getPath()).isEqualTo("/api/auth/health");
-    }
-
-    @Test
     void authenticatedRequestToUserRoute_shouldBeProxiedAndAddHeaders() throws InterruptedException {
         String token = JwtTestUtils.createToken(mockAuthServer.url("/realms/veer").toString());
         String userId = "some-user-id";

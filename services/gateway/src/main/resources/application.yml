@@ -19,8 +19,6 @@ management:
         enabled: false
 
 services:
-  auth:
-    uri: http://auth-service:3002
   user:
     uri: http://user-service:3003
 
