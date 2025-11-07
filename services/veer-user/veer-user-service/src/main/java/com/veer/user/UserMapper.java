@@ -23,7 +23,10 @@ public class UserMapper {
             .username(user.getUsername())
             .bio(user.getBio())
             .country(user.getCountry())
+            .followingCount(user.getFollowing() != null ? user.getFollowing().size() : 0)
+            .followerCount(user.getFollowers() != null ? user.getFollowers().size() : 0)
             .profilePicture(user.getProfilePicture())
+            .joinedAt(user.getCreatedAt())
             .build();
     }
 
