@@ -1,0 +1,30 @@
+package com.veer.user;
+
+import com.veer.user.model.CreateUserDto;
+import com.veer.user.model.User;
+import com.veer.user.model.ResponseUserDto;
+
+public class UserMapper {
+
+    public static User toEntity(CreateUserDto createUserDto) {
+        return User.builder()
+            .email(createUserDto.getEmail())
+            .username(createUserDto.getUsername())
+            .bio(createUserDto.getBio())
+            .country(createUserDto.getCountry())
+            .profilePicture(createUserDto.getProfilePicture())
+            .build();
+    }
+
+    public static ResponseUserDto toResponseUserDto(User user) {
+        return ResponseUserDto.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .username(user.getUsername())
+            .bio(user.getBio())
+            .country(user.getCountry())
+            .profilePicture(user.getProfilePicture())
+            .build();
+    }
+
+}
