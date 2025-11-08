@@ -3,6 +3,7 @@ package com.veer.user.service;
 import com.veer.user.model.User;
 import com.veer.user.model.dto.CreateUserDto;
 import com.veer.user.model.dto.ResponseUserDto;
+import com.veer.user.model.exception.UserAlreadyExistsException;
 import com.veer.user.model.exception.UserNotFoundException;
 import com.veer.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -157,6 +158,29 @@ class UserServiceImplTest {
             assertEquals(0, capturedUser.getFollowing().size());
             assertEquals(0, capturedUser.getFollowers().size());
         }
+
+        @Test
+        @DisplayName("Should throw UserAlreadyExistsException when user already exists")
+        void shouldThrowUserAlreadyExistsExceptionWhenUserAlreadyExists() {
+            CreateUserDto createUserDto = CreateUserDto.builder()
+                .id("user-123")
+                .email("test@example.com")
+                .username("testuser")
+                .build();
+
+            when(userRepository
+                .findById(createUserDto.getId()))
+                .thenReturn(Optional.of(User.builder().build()));
+
+            UserAlreadyExistsException exception = assertThrows(UserAlreadyExistsException.class, () -> {
+                userService.createUser(createUserDto);
+            });
+
+            assertTrue(exception.getMessage().contains("User " + createUserDto.getId() + " already exists"));
+            verify(userRepository, times(1)).findById(createUserDto.getId());
+            verify(userRepository, never()).save(any(User.class));
+        }
+
     }
 
     @Nested

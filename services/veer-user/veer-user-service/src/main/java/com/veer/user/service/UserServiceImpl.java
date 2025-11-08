@@ -1,6 +1,7 @@
 package com.veer.user.service;
 
 import com.veer.user.repository.UserRepository;
+import com.veer.user.model.exception.UserAlreadyExistsException;
 import com.veer.user.model.exception.UserNotFoundException;
 import com.veer.user.UserMapper;
 import com.veer.user.model.User;
@@ -17,6 +18,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseUserDto createUser(CreateUserDto createUserDto) {
+        if (repository.findById(createUserDto.getId()).isPresent()) {
+            throw new UserAlreadyExistsException(
+                "User " + createUserDto.getId() + " already exists"
+            );
+        }
         User user = UserMapper.toEntity(createUserDto);
         User savedUser = repository.save(user);
         return UserMapper.toResponseUserDto(savedUser);
