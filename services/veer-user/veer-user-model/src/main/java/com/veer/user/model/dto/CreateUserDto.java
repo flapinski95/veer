@@ -15,6 +15,10 @@ import jakarta.validation.constraints.Size;
 public class CreateUserDto {
 
     @NotBlank
+    @Size(max =36)
+    private String id;
+
+    @NotBlank
     @Email
     private String email;
 

@@ -44,6 +44,7 @@ class UserServiceImplTest {
         @DisplayName("Should create user successfully with all fields")
         void shouldCreateUserSuccessfully() {
             CreateUserDto createUserDto = CreateUserDto.builder()
+                .id("user-123")
                 .email("test@example.com")
                 .username("testuser")
                 .bio("Test bio")
@@ -83,6 +84,7 @@ class UserServiceImplTest {
         @DisplayName("Should create user with minimal required fields")
         void shouldCreateUserWithMinimalFields() {
             CreateUserDto createUserDto = CreateUserDto.builder()
+                .id("user-456")
                 .email("minimal@example.com")
                 .username("minuser")
                 .country("Canada")
@@ -119,6 +121,7 @@ class UserServiceImplTest {
         @DisplayName("Should verify correct User entity is passed to repository when creating")
         void shouldPassCorrectEntityToRepository() {
             CreateUserDto createUserDto = CreateUserDto.builder()
+                .id("user-789")
                 .email("verify@example.com")
                 .username("verifyuser")
                 .bio("Verification bio")

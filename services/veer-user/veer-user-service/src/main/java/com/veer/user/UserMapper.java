@@ -8,6 +8,7 @@ public class UserMapper {
 
     public static User toEntity(CreateUserDto createUserDto) {
         return User.builder()
+            .id(createUserDto.getId())
             .email(createUserDto.getEmail())
             .username(createUserDto.getUsername())
             .bio(createUserDto.getBio())
