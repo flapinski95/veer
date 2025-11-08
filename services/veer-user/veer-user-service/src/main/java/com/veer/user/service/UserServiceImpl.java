@@ -31,4 +31,13 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toResponseUserDto(user);
     }
 
+    @Override
+    public void deleteUserById(String userId) {
+        User user = repository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(
+                "User " + userId + " not found"
+            ));
+        repository.delete(user);
+    }
+
 }
