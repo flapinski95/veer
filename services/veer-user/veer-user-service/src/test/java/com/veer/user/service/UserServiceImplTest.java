@@ -319,5 +319,41 @@ class UserServiceImplTest {
             verify(userRepository, times(1)).findById(userId);
         }
     }
+
+    @Nested
+    @DisplayName("deleteUserById Tests")
+    class DeleteUserByIdTests {
+
+        @Test
+        @DisplayName("Should delete user by ID successfully")
+        void shouldDeleteUserByIdSuccessfully() {
+            String userId = "user-to-delete";
+            User user = User.builder()
+                .id(userId)
+                .build();
+
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+            assertDoesNotThrow(() -> userService.deleteUserById(userId));
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).delete(user);
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when trying to delete a non-existent user")
+        void shouldThrowUserNotFoundExceptionForNonExistentUser() {
+            String userId = "non-existent-user";
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+                userService.deleteUserById(userId);
+            });
+
+            assertEquals("User " + userId + " not found", exception.getMessage());
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, never()).delete(any(User.class));
+        }
+    }
 }
 
