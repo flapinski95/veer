@@ -3,6 +3,7 @@ package com.veer.user.service;
 import com.veer.user.model.User;
 import com.veer.user.model.dto.CreateUserDto;
 import com.veer.user.model.dto.ResponseUserDto;
+import com.veer.user.model.dto.UpdateUserDto;
 import com.veer.user.model.exception.UserAlreadyExistsException;
 import com.veer.user.model.exception.UserNotFoundException;
 import com.veer.user.repository.UserRepository;
@@ -380,6 +381,95 @@ class UserServiceImplTest {
             assertEquals("User " + userId + " not found", exception.getMessage());
             verify(userRepository, times(1)).findById(userId);
             verify(userRepository, never()).delete(any(User.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUser Tests")
+    class UpdateUserTests {
+
+        @Test
+        @DisplayName("Should update user successfully")
+        void shouldUpdateUserSuccessfully() {
+            String userId = "user-to-update";
+            UpdateUserDto updateUserDto = UpdateUserDto.builder()
+                .id(userId)
+                .username("newUsername")
+                .bio("newBio")
+                .country("newCountry")
+                .profilePicture("newProfilePicture")
+                .build();
+
+            User existingUser = User.builder()
+                .id(userId)
+                .username("oldUsername")
+                .bio("oldBio")
+                .country("oldCountry")
+                .profilePicture("oldProfilePicture")
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            ResponseUserDto result = userService.updateUser(updateUserDto);
+
+            assertNotNull(result);
+            assertEquals(userId, result.getId());
+            assertEquals("newUsername", result.getUsername());
+            assertEquals("newBio", result.getBio());
+            assertEquals("newCountry", result.getCountry());
+            assertEquals("newProfilePicture", result.getProfilePicture());
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when user to update is not found")
+        void shouldThrowUserNotFoundExceptionWhenUserNotFound() {
+            String userId = "non-existent-user";
+            UpdateUserDto updateUserDto = UpdateUserDto.builder().id(userId).build();
+
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            assertThrows(UserNotFoundException.class, () -> {
+                userService.updateUser(updateUserDto);
+            });
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should only update non-null fields")
+        void shouldOnlyUpdateNonNullFields() {
+            String userId = "user-partial-update";
+            UpdateUserDto updateUserDto = UpdateUserDto.builder()
+                .id(userId)
+                .username("newPartialUsername")
+                .bio(null) 
+                .build();
+
+            User existingUser = User.builder()
+                .id(userId)
+                .username("oldPartialUsername")
+                .bio("oldPartialBio")
+                .country("oldPartialCountry")
+                .build();
+
+            ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
+            when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            userService.updateUser(updateUserDto);
+
+            verify(userRepository).save(userCaptor.capture());
+            User savedUser = userCaptor.getValue();
+            
+            assertEquals("newPartialUsername", savedUser.getUsername());
+            assertEquals("oldPartialBio", savedUser.getBio());
+            assertEquals("oldPartialCountry", savedUser.getCountry());
         }
     }
 }

@@ -7,6 +7,7 @@ import com.veer.user.UserMapper;
 import com.veer.user.model.User;
 import com.veer.user.model.dto.CreateUserDto;
 import com.veer.user.model.dto.ResponseUserDto;
+import com.veer.user.model.dto.UpdateUserDto;
 
 public class UserServiceImpl implements UserService {
 
@@ -46,4 +47,24 @@ public class UserServiceImpl implements UserService {
         repository.delete(user);
     }
 
+    @Override
+    public ResponseUserDto updateUser(UpdateUserDto updateUserDto) {
+        User user = repository.findById(updateUserDto.getId())
+            .orElseThrow(() -> new UserNotFoundException(
+                "User " + updateUserDto.getId() + " not found"
+            ));
+
+        if (updateUserDto.getUsername() != null) 
+            user.setUsername(updateUserDto.getUsername());
+        if (updateUserDto.getBio() != null) 
+            user.setBio(updateUserDto.getBio());
+        if (updateUserDto.getCountry() != null) 
+            user.setCountry(updateUserDto.getCountry());
+        if (updateUserDto.getProfilePicture() != null)
+            user.setProfilePicture(updateUserDto.getProfilePicture());
+
+        User updatedUser = repository.save(user);
+        
+        return UserMapper.toResponseUserDto(updatedUser);
+    }
 }
