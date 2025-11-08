@@ -1,7 +1,7 @@
 package com.veer.user.service;
 
-import com.veer.user.model.ResponseUserDto;
-import com.veer.user.model.CreateUserDto;
+import com.veer.user.model.dto.CreateUserDto;
+import com.veer.user.model.dto.ResponseUserDto;
 
 public interface UserService {
 

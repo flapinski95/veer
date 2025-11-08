@@ -1,11 +1,11 @@
 package com.veer.user.service;
 
-import com.veer.user.model.ResponseUserDto;
-import com.veer.user.model.CreateUserDto;
 import com.veer.user.repository.UserRepository;
 import com.veer.user.model.exception.UserNotFoundException;
 import com.veer.user.UserMapper;
 import com.veer.user.model.User;
+import com.veer.user.model.dto.CreateUserDto;
+import com.veer.user.model.dto.ResponseUserDto;
 
 public class UserServiceImpl implements UserService {
 

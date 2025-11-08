@@ -1,4 +1,4 @@
-package com.veer.user.model;
+package com.veer.user.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
