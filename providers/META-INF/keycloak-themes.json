@@ -1,0 +1,9 @@
+{
+  "themes": [
+    {
+      "name": "veer",
+      "types": ["login"],
+      "path": "resources/themes"
+    }
+  ]
+}

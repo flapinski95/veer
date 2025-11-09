@@ -1,0 +1,5 @@
+com/veer/gateway/config/GatewayRoutes.class
+com/veer/gateway/filters/AddUserDetailsHeaderGatewayFilterFactory.class
+com/veer/gateway/filters/AddUserDetailsHeaderGatewayFilterFactory$Config.class
+com/veer/gateway/config/SecurityConfig.class
+com/veer/gateway/GatewayApplication.class
