@@ -72,4 +72,12 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser(
+        @RequestHeader("X-User-Id") @NotBlank String userId
+    ) {
+        userService.deleteUserById(userId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
