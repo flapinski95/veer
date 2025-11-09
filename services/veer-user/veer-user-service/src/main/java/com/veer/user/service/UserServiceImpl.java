@@ -9,6 +9,10 @@ import com.veer.user.model.dto.CreateUserDto;
 import com.veer.user.model.dto.ResponseUserDto;
 import com.veer.user.model.dto.UpdateUserDto;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
 public class UserServiceImpl implements UserService {
 
     UserRepository repository;
@@ -17,6 +21,7 @@ public class UserServiceImpl implements UserService {
         this.repository = repository;
     }
 
+    @Transactional
     @Override
     public ResponseUserDto createUser(CreateUserDto createUserDto) {
         if (repository.findById(createUserDto.getId()).isPresent()) {
@@ -29,6 +34,7 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toResponseUserDto(savedUser);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ResponseUserDto getUserById(String userId) {
         User user = repository.findById(userId)
@@ -38,6 +44,7 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toResponseUserDto(user);
     }
 
+    @Transactional
     @Override
     public void deleteUserById(String userId) {
         User user = repository.findById(userId)
@@ -47,6 +54,7 @@ public class UserServiceImpl implements UserService {
         repository.delete(user);
     }
 
+    @Transactional
     @Override
     public ResponseUserDto updateUser(UpdateUserDto updateUserDto) {
         User user = repository.findById(updateUserDto.getId())
