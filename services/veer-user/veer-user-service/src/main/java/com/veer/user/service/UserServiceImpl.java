@@ -54,6 +54,14 @@ public class UserServiceImpl implements UserService {
                 "User " + updateUserDto.getId() + " not found"
             ));
 
+        User updatedUser = updateUserEntity(user, updateUserDto);
+
+        User savedUser = repository.save(updatedUser);
+        
+        return UserMapper.toResponseUserDto(savedUser);
+    }
+
+    private User updateUserEntity(User user, UpdateUserDto updateUserDto) {
         if (updateUserDto.getUsername() != null) 
             user.setUsername(updateUserDto.getUsername());
         if (updateUserDto.getBio() != null) 
@@ -63,8 +71,6 @@ public class UserServiceImpl implements UserService {
         if (updateUserDto.getProfilePicture() != null)
             user.setProfilePicture(updateUserDto.getProfilePicture());
 
-        User updatedUser = repository.save(user);
-        
-        return UserMapper.toResponseUserDto(updatedUser);
+        return user;
     }
 }
