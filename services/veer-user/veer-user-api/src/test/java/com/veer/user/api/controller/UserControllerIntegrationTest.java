@@ -1,7 +1,9 @@
 package com.veer.user.api.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.veer.user.api.exception.GlobalExceptionHandler;
 import com.veer.user.model.User;
+import com.veer.user.model.dto.UpdateUserDto;
 import com.veer.user.repository.UserRepository;
 import com.veer.user.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +25,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
@@ -34,6 +35,9 @@ class UserControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private UserRepository userRepository;
@@ -504,6 +508,317 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").doesNotExist());
 
             verify(userRepository, times(1)).findById(userId);
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH /api/user - Update User Tests")
+    class UpdateUserTests {
+
+        @Test
+        @DisplayName("Should update user successfully with all fields")
+        void shouldUpdateUserSuccessfully() throws Exception {
+            String userId = "update-user-123";
+            
+            User existingUser = User.builder()
+                .id(userId)
+                .email("existing@example.com")
+                .username("oldusername")
+                .bio("Old bio")
+                .country("OldCountry")
+                .profilePicture("https://example.com/old.jpg")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("newusername")
+                .bio("New bio")
+                .country("NewCountry")
+                .profilePicture("https://example.com/new.jpg")
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                user.setUsername("newusername");
+                user.setBio("New bio");
+                user.setCountry("NewCountry");
+                user.setProfilePicture("https://example.com/new.jpg");
+                return user;
+            });
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(userId)))
+                .andExpect(jsonPath("$.username", is("newusername")))
+                .andExpect(jsonPath("$.bio", is("New bio")))
+                .andExpect(jsonPath("$.country", is("NewCountry")))
+                .andExpect(jsonPath("$.profilePicture", is("https://example.com/new.jpg")));
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should update user with partial data (only username)")
+        void shouldUpdateUserPartially() throws Exception {
+            String userId = "partial-update-user";
+            
+            User existingUser = User.builder()
+                .id(userId)
+                .email("partial@example.com")
+                .username("oldname")
+                .bio("Keep this bio")
+                .country("KeepCountry")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("newname")
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                return user;
+            });
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(userId)))
+                .andExpect(jsonPath("$.username", is("newname")))
+                .andExpect(jsonPath("$.bio", is("Keep this bio")))
+                .andExpect(jsonPath("$.country", is("KeepCountry")));
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should return 404 when user not found")
+        void shouldReturnNotFoundWhenUserNotExists() throws Exception {
+            String userId = "non-existent-user";
+            
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("newname")
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("Not Found")))
+                .andExpect(jsonPath("$.message", containsString("not found")));
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when X-User-Id header is missing")
+        void shouldReturnBadRequestWhenHeaderMissing() throws Exception {
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("newname")
+                .build();
+
+            mockMvc.perform(patch("/api/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).findById(anyString());
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when X-User-Id header is empty")
+        void shouldReturnBadRequestWhenHeaderEmpty() throws Exception {
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("newname")
+                .build();
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", "")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).findById(anyString());
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should handle empty body (no changes)")
+        void shouldHandleEmptyBody() throws Exception {
+            String userId = "test-user";
+            
+            User existingUser = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .username("testuser")
+                .country("TestCountry")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(userId)))
+                .andExpect(jsonPath("$.username", is("testuser"))); // No changes
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when username is too short")
+        void shouldReturnBadRequestWhenUsernameInvalid() throws Exception {
+            String userId = "validatily from header, not from request bodyon-user";
+            
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("ab")
+                .build();
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).findById(anyString());
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should verify that ID from header overrides ID in body")
+        void shouldUseIdFromHeader() throws Exception {
+            String headerUserId = "correct-user-id";
+            String bodyUserId = "wrong-user-id";
+            
+            User existingUser = User.builder()
+                .id(headerUserId)
+                .email("test@example.com")
+                .username("testuser")
+                .country("TestCountry")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .id(bodyUserId) // This should be overridden
+                .username("updatedname")
+                .build();
+            
+            when(userRepository.findById(headerUserId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", headerUserId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(headerUserId)));
+
+            verify(userRepository, times(1)).findById(headerUserId);
+            verify(userRepository, never()).findById(bodyUserId);
+        }
+
+        @Test
+        @DisplayName("Should update multiple fields correctly")
+        void shouldUpdateMultipleFields() throws Exception {
+            String userId = "multi-update-user";
+            
+            User existingUser = User.builder()
+                .id(userId)
+                .email("multi@example.com")
+                .username("oldname")
+                .bio("Old bio")
+                .country("OldCountry")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("newname")
+                .bio("New bio")
+                .country("NewCountry")
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk());
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).save(argThat(user ->
+                user.getId().equals(userId) &&
+                user.getUsername().equals("newname") &&
+                user.getBio().equals("New bio") &&
+                user.getCountry().equals("NewCountry")
+            ));
+        }
+
+        @Test
+        @DisplayName("Should not change email when updating user")
+        void shouldNotChangeEmail() throws Exception {
+            String userId = "email-protect-user";
+            String originalEmail = "protected@example.com";
+            
+            User existingUser = User.builder()
+                .id(userId)
+                .email(originalEmail)
+                .username("testuser")
+                .country("TestCountry")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+
+            UpdateUserDto updateDto = UpdateUserDto.builder()
+                .username("newusername")
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            mockMvc.perform(patch("/api/user")
+                    .header("X-User-Id", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email", is(originalEmail))); // Email unchanged
+
+            verify(userRepository, times(1)).save(argThat(user ->
+                user.getEmail().equals(originalEmail)
+            ));
         }
     }
 }
