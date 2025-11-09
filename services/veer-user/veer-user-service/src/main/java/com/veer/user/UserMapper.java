@@ -11,9 +11,7 @@ public class UserMapper {
             .id(createUserDto.getId())
             .email(createUserDto.getEmail())
             .username(createUserDto.getUsername())
-            .bio(createUserDto.getBio())
             .country(createUserDto.getCountry())
-            .profilePicture(createUserDto.getProfilePicture())
             .build();
     }
 

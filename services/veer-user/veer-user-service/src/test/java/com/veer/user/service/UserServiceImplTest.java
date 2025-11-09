@@ -49,18 +49,14 @@ class UserServiceImplTest {
                 .id("user-123")
                 .email("test@example.com")
                 .username("testuser")
-                .bio("Test bio")
                 .country("United States")
-                .profilePicture("https://example.com/profile.jpg")
                 .build();
 
             User savedUser = User.builder()
                 .id("user-123")
                 .email("test@example.com")
                 .username("testuser")
-                .bio("Test bio")
                 .country("United States")
-                .profilePicture("https://example.com/profile.jpg")
                 .createdAt(Instant.now())
                 .following(new HashSet<>())
                 .followers(new HashSet<>())
@@ -74,11 +70,11 @@ class UserServiceImplTest {
             assertEquals("user-123", result.getId());
             assertEquals("test@example.com", result.getEmail());
             assertEquals("testuser", result.getUsername());
-            assertEquals("Test bio", result.getBio());
+            assertEquals(null, result.getBio());
             assertEquals("United States", result.getCountry());
             assertEquals(0, result.getFollowingCount());
             assertEquals(0, result.getFollowerCount());
-            assertEquals("https://example.com/profile.jpg", result.getProfilePicture());
+            assertEquals(null, result.getProfilePicture());
             verify(userRepository, times(1)).save(any(User.class));
         }
 
@@ -126,18 +122,14 @@ class UserServiceImplTest {
                 .id("user-789")
                 .email("verify@example.com")
                 .username("verifyuser")
-                .bio("Verification bio")
                 .country("Germany")
-                .profilePicture("https://example.com/verify.jpg")
                 .build();
 
             User savedUser = User.builder()
                 .id("user-789")
                 .email("verify@example.com")
                 .username("verifyuser")
-                .bio("Verification bio")
                 .country("Germany")
-                .profilePicture("https://example.com/verify.jpg")
                 .createdAt(Instant.now())
                 .following(new HashSet<>())
                 .followers(new HashSet<>())
@@ -153,9 +145,9 @@ class UserServiceImplTest {
             
             assertEquals("verify@example.com", capturedUser.getEmail());
             assertEquals("verifyuser", capturedUser.getUsername());
-            assertEquals("Verification bio", capturedUser.getBio());
+            assertEquals(null, capturedUser.getBio());
             assertEquals("Germany", capturedUser.getCountry());
-            assertEquals("https://example.com/verify.jpg", capturedUser.getProfilePicture());
+            assertEquals(null, capturedUser.getProfilePicture());
             assertEquals(0, capturedUser.getFollowing().size());
             assertEquals(0, capturedUser.getFollowers().size());
         }
@@ -196,9 +188,7 @@ class UserServiceImplTest {
                 .id(userId)
                 .email("found@example.com")
                 .username("founduser")
-                .bio("Found bio")
                 .country("France")
-                .profilePicture("https://example.com/found.jpg")
                 .createdAt(Instant.now())
                 .following(new HashSet<>())
                 .followers(new HashSet<>())
@@ -212,9 +202,9 @@ class UserServiceImplTest {
             assertEquals(userId, result.getId());
             assertEquals("found@example.com", result.getEmail());
             assertEquals("founduser", result.getUsername());
-            assertEquals("Found bio", result.getBio());
             assertEquals("France", result.getCountry());
-            assertEquals("https://example.com/found.jpg", result.getProfilePicture());
+            assertEquals(null, result.getBio());
+            assertEquals(null, result.getProfilePicture());
             assertEquals(0, result.getFollowingCount());
             assertEquals(0, result.getFollowerCount());
 
@@ -395,17 +385,13 @@ class UserServiceImplTest {
             UpdateUserDto updateUserDto = UpdateUserDto.builder()
                 .id(userId)
                 .username("newUsername")
-                .bio("newBio")
                 .country("newCountry")
-                .profilePicture("newProfilePicture")
                 .build();
 
             User existingUser = User.builder()
                 .id(userId)
                 .username("oldUsername")
-                .bio("oldBio")
                 .country("oldCountry")
-                .profilePicture("oldProfilePicture")
                 .build();
             
             when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
@@ -416,9 +402,9 @@ class UserServiceImplTest {
             assertNotNull(result);
             assertEquals(userId, result.getId());
             assertEquals("newUsername", result.getUsername());
-            assertEquals("newBio", result.getBio());
             assertEquals("newCountry", result.getCountry());
-            assertEquals("newProfilePicture", result.getProfilePicture());
+            assertEquals(null, result.getBio());
+            assertEquals(null, result.getProfilePicture());
 
             verify(userRepository, times(1)).findById(userId);
             verify(userRepository, times(1)).save(any(User.class));
@@ -453,7 +439,6 @@ class UserServiceImplTest {
             User existingUser = User.builder()
                 .id(userId)
                 .username("oldPartialUsername")
-                .bio("oldPartialBio")
                 .country("oldPartialCountry")
                 .build();
 
@@ -468,7 +453,7 @@ class UserServiceImplTest {
             User savedUser = userCaptor.getValue();
             
             assertEquals("newPartialUsername", savedUser.getUsername());
-            assertEquals("oldPartialBio", savedUser.getBio());
+            assertEquals(null, savedUser.getBio());
             assertEquals("oldPartialCountry", savedUser.getCountry());
         }
     }

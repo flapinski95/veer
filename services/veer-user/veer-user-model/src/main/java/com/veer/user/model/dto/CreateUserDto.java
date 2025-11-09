@@ -15,7 +15,7 @@ import jakarta.validation.constraints.Size;
 public class CreateUserDto {
 
     @NotBlank
-    @Size(max =36)
+    @Size(max = 36)
     private String id;
 
     @NotBlank
@@ -26,13 +26,8 @@ public class CreateUserDto {
     @Size(min = 3, max = 15)
     private String username;
 
-    @Size(max = 50)
-    private String bio;
-
     @NotBlank
     @Size(min = 3, max = 26)
     private String country;
-
-    private String profilePicture;
 
 }
