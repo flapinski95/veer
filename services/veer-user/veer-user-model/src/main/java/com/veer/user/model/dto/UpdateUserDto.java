@@ -13,9 +13,7 @@ import jakarta.validation.constraints.Size;
 @AllArgsConstructor
 public class UpdateUserDto {
 
-    @NotBlank
-    @Size(max = 36)
-    private String id;
+    private String id; // Set internally from header, not from request body
 
     @Size(min = 3, max = 15)
     private String username;
