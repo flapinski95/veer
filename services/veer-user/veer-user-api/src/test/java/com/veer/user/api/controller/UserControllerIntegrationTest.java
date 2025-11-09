@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doNothing;
 
 @WebMvcTest(UserController.class)
 @Import({UserServiceImpl.class, GlobalExceptionHandler.class})
@@ -819,6 +820,210 @@ class UserControllerIntegrationTest {
             verify(userRepository, times(1)).save(argThat(user ->
                 user.getEmail().equals(originalEmail)
             ));
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/user - Delete User Tests")
+    class DeleteUserTests {
+
+        @Test
+        @DisplayName("Should delete user successfully")
+        void shouldDeleteUserSuccessfully() throws Exception {
+            String userId = "delete-user-123";
+            
+            User user = User.builder()
+                .id(userId)
+                .email("delete@example.com")
+                .username("deleteuser")
+                .country("Poland")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            doNothing().when(userRepository).delete(any(User.class));
+
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", userId))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).delete(user);
+        }
+
+        @Test
+        @DisplayName("Should return 404 when user not found")
+        void shouldReturnNotFoundWhenUserNotExists() throws Exception {
+            String userId = "non-existent-user";
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("Not Found")))
+                .andExpect(jsonPath("$.message", containsString("not found")));
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, never()).delete(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when X-User-Id header is missing")
+        void shouldReturnBadRequestWhenHeaderMissing() throws Exception {
+            mockMvc.perform(delete("/api/user"))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).findById(anyString());
+            verify(userRepository, never()).delete(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when X-User-Id header is empty")
+        void shouldReturnBadRequestWhenHeaderEmpty() throws Exception {
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", ""))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).findById(anyString());
+            verify(userRepository, never()).delete(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should verify correct user is deleted")
+        void shouldVerifyCorrectUserDeleted() throws Exception {
+            String userId = "verify-delete-user";
+            
+            User user = User.builder()
+                .id(userId)
+                .email("verify@example.com")
+                .username("verifyuser")
+                .country("Germany")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            doNothing().when(userRepository).delete(any(User.class));
+
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", userId))
+                .andExpect(status().isNoContent());
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).delete(argThat(u ->
+                u.getId().equals(userId) &&
+                u.getEmail().equals("verify@example.com") &&
+                u.getUsername().equals("verifyuser")
+            ));
+        }
+
+        @Test
+        @DisplayName("Should delete user with followers and following")
+        void shouldDeleteUserWithRelationships() throws Exception {
+            String userId = "popular-delete-user";
+            
+            HashSet<User> followers = new HashSet<>();
+            followers.add(User.builder().id("follower1").build());
+            followers.add(User.builder().id("follower2").build());
+            
+            HashSet<User> following = new HashSet<>();
+            following.add(User.builder().id("following1").build());
+
+            User user = User.builder()
+                .id(userId)
+                .email("popular@example.com")
+                .username("popularuser")
+                .country("Spain")
+                .createdAt(Instant.now())
+                .followers(followers)
+                .following(following)
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            doNothing().when(userRepository).delete(any(User.class));
+
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", userId))
+                .andExpect(status().isNoContent());
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(userRepository, times(1)).delete(user);
+        }
+
+        @Test
+        @DisplayName("Should handle multiple delete requests for different users")
+        void shouldHandleMultipleDeletes() throws Exception {
+            String userId1 = "delete-user-1";
+            String userId2 = "delete-user-2";
+
+            User user1 = User.builder()
+                .id(userId1)
+                .email("user1@example.com")
+                .username("user1")
+                .country("Poland")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+
+            User user2 = User.builder()
+                .id(userId2)
+                .email("user2@example.com")
+                .username("user2")
+                .country("Germany")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+
+            when(userRepository.findById(userId1)).thenReturn(Optional.of(user1));
+            when(userRepository.findById(userId2)).thenReturn(Optional.of(user2));
+            doNothing().when(userRepository).delete(any(User.class));
+
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", userId1))
+                .andExpect(status().isNoContent());
+
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", userId2))
+                .andExpect(status().isNoContent());
+
+            verify(userRepository, times(1)).findById(userId1);
+            verify(userRepository, times(1)).findById(userId2);
+            verify(userRepository, times(1)).delete(user1);
+            verify(userRepository, times(1)).delete(user2);
+        }
+
+        @Test
+        @DisplayName("Should return proper HTTP 204 No Content status")
+        void shouldReturnNoContentStatus() throws Exception {
+            String userId = "no-content-user";
+            
+            User user = User.builder()
+                .id(userId)
+                .email("nocontent@example.com")
+                .username("nocontentuser")
+                .country("France")
+                .createdAt(Instant.now())
+                .followers(new HashSet<>())
+                .following(new HashSet<>())
+                .build();
+            
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            doNothing().when(userRepository).delete(any(User.class));
+
+            mockMvc.perform(delete("/api/user")
+                    .header("X-User-Id", userId))
+                .andExpect(status().isNoContent())
+                .andExpect(status().is(204));
+
+            verify(userRepository, times(1)).delete(any(User.class));
         }
     }
 }
