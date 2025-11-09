@@ -43,7 +43,7 @@ class UserControllerIntegrationTest {
     }
 
     @Nested
-    @DisplayName("POST /api/users - Create User Tests")
+    @DisplayName("POST /api/user - Create User Tests")
     class CreateUserTests {
 
         @Test
@@ -63,7 +63,7 @@ class UserControllerIntegrationTest {
                 return user;
             });
 
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", userId)
                     .header("X-User-Email", userEmail)
                     .header("X-User-Name", userName)
@@ -98,7 +98,7 @@ class UserControllerIntegrationTest {
             
             when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
 
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", userId)
                     .header("X-User-Email", "new@example.com")
                     .header("X-User-Name", "newuser")
@@ -131,7 +131,7 @@ class UserControllerIntegrationTest {
                 return user;
             });
 
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", userId)
                     .header("X-User-Email", userEmail)
                     .header("X-User-Name", userName)
@@ -155,7 +155,7 @@ class UserControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when X-User-Id header is missing")
         void shouldReturnBadRequestWhenUserIdHeaderMissing() throws Exception {
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Email", "test@example.com")
                     .header("X-User-Name", "testuser")
                     .header("X-User-Country", "Poland")
@@ -168,7 +168,7 @@ class UserControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when X-User-Email header is missing")
         void shouldReturnBadRequestWhenUserEmailHeaderMissing() throws Exception {
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", "test-user-123")
                     .header("X-User-Name", "testuser")
                     .header("X-User-Country", "Poland")
@@ -181,7 +181,7 @@ class UserControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when X-User-Name header is missing")
         void shouldReturnBadRequestWhenUserNameHeaderMissing() throws Exception {
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", "test-user-123")
                     .header("X-User-Email", "test@example.com")
                     .header("X-User-Country", "Poland")
@@ -194,7 +194,7 @@ class UserControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when X-User-Country header is missing")
         void shouldReturnBadRequestWhenUserCountryHeaderMissing() throws Exception {
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", "test-user-123")
                     .header("X-User-Email", "test@example.com")
                     .header("X-User-Name", "testuser")
@@ -207,7 +207,7 @@ class UserControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when all headers are missing")
         void shouldReturnBadRequestWhenAllHeadersMissing() throws Exception {
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
@@ -217,7 +217,7 @@ class UserControllerIntegrationTest {
         @Test
         @DisplayName("Should handle empty string headers as bad request")
         void shouldHandleEmptyStringHeaders() throws Exception {
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", "")
                     .header("X-User-Email", "test@example.com")
                     .header("X-User-Name", "testuser")
@@ -240,7 +240,7 @@ class UserControllerIntegrationTest {
                 return user;
             });
 
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", "user-1")
                     .header("X-User-Email", "user1@example.com")
                     .header("X-User-Name", "user1")
@@ -249,7 +249,7 @@ class UserControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is("user-1")));
 
-            mockMvc.perform(post("/api/users")
+            mockMvc.perform(post("/api/user")
                     .header("X-User-Id", "user-2")
                     .header("X-User-Email", "user2@example.com")
                     .header("X-User-Name", "user2")

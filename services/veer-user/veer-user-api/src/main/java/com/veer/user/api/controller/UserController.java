@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @Validated
 public class UserController {
 
