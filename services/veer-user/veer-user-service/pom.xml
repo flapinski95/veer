@@ -16,10 +16,6 @@
     <dependencies>
         <dependency>
             <groupId>com.veer</groupId>
-            <artifactId>veer-user-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.veer</groupId>
             <artifactId>veer-user-model</artifactId>
         </dependency>
         <!-- Test dependencies -->

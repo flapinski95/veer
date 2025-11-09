@@ -43,6 +43,11 @@
                 <artifactId>veer-user-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.veer</groupId>
+                <artifactId>veer-user-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
