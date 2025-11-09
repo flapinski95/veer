@@ -2,6 +2,7 @@ package com.veer.user.api.controller;
 
 import com.veer.user.model.dto.CreateUserDto;
 import com.veer.user.model.dto.ResponseUserDto;
+import com.veer.user.model.dto.UpdateUserDto;
 import com.veer.user.service.UserService;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/user")
@@ -57,6 +59,16 @@ public class UserController {
 
         user.setEmail(null); // for now the only private data is the email
 
+        return ResponseEntity.ok(user);
+    }
+
+    @PatchMapping
+    public ResponseEntity<ResponseUserDto> updateUser(
+        @RequestHeader("X-User-Id") @NotBlank String userId,
+        @RequestBody @Valid UpdateUserDto updateUserDto
+    ) {
+        updateUserDto.setId(userId);
+        ResponseUserDto user = userService.updateUser(updateUserDto);
         return ResponseEntity.ok(user);
     }
 
