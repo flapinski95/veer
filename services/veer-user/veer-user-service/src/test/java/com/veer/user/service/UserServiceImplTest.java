@@ -4,6 +4,8 @@ import com.veer.user.model.User;
 import com.veer.user.model.dto.CreateUserDto;
 import com.veer.user.model.dto.ResponseUserDto;
 import com.veer.user.model.dto.UpdateUserDto;
+import com.veer.user.model.exception.FollowingAlreadyExistsException;
+import com.veer.user.model.exception.FollowingNotFoundException;
 import com.veer.user.model.exception.UserAlreadyExistsException;
 import com.veer.user.model.exception.UserNotFoundException;
 import com.veer.user.repository.UserRepository;
@@ -455,6 +457,170 @@ class UserServiceImplTest {
             assertEquals("newPartialUsername", savedUser.getUsername());
             assertEquals(null, savedUser.getBio());
             assertEquals("oldPartialCountry", savedUser.getCountry());
+        }
+    }
+
+    @Nested
+    @DisplayName("createFollowRelationship Tests")
+    class CreateFollowRelationshipTests {
+
+        @Test
+        @DisplayName("Should create follow relationship successfully")
+        void shouldCreateFollowRelationshipSuccessfully() {
+            String followingUserId = "user-1";
+            String followedUserId = "user-2";
+
+            User followingUser = User.builder().id(followingUserId).following(new HashSet<>()).build();
+            User followedUser = User.builder().id(followedUserId).followers(new HashSet<>()).build();
+
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.of(followingUser));
+            when(userRepository.findById(followedUserId)).thenReturn(Optional.of(followedUser));
+
+            ResponseUserDto result = userService.createFollowRelationship(followingUserId, followedUserId);
+
+            assertNotNull(result);
+            assertEquals(followedUserId, result.getId());
+            assertTrue(followingUser.getFollowing().contains(followedUser));
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when user tries to follow themself")
+        void shouldThrowExceptionWhenFollowingAndFollowedUsersAreSame() {
+            String userId = "user-1";
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                userService.createFollowRelationship(userId, userId);
+            });
+
+            assertEquals("Following and followed users cannot be the same", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when following user is not found")
+        void shouldThrowUserNotFoundExceptionWhenFollowingUserNotFound() {
+            String followingUserId = "non-existent-user";
+            String followedUserId = "user-2";
+
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.empty());
+
+            assertThrows(UserNotFoundException.class, () -> {
+                userService.createFollowRelationship(followingUserId, followedUserId);
+            });
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when followed user is not found")
+        void shouldThrowUserNotFoundExceptionWhenFollowedUserNotFound() {
+            String followingUserId = "user-1";
+            String followedUserId = "non-existent-user";
+
+            User followingUser = User.builder().id(followingUserId).build();
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.of(followingUser));
+            when(userRepository.findById(followedUserId)).thenReturn(Optional.empty());
+
+            assertThrows(UserNotFoundException.class, () -> {
+                userService.createFollowRelationship(followingUserId, followedUserId);
+            });
+        }
+
+        @Test
+        @DisplayName("Should throw FollowingAlreadyExistsException when user already follows another")
+        void shouldThrowFollowingAlreadyExistsExceptionWhenRelationshipExists() {
+            String followingUserId = "user-1";
+            String followedUserId = "user-2";
+
+            User followedUser = User.builder().id(followedUserId).build();
+            HashSet<User> followingSet = new HashSet<>();
+            followingSet.add(followedUser);
+            User followingUser = User.builder().id(followingUserId).following(followingSet).build();
+
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.of(followingUser));
+            when(userRepository.findById(followedUserId)).thenReturn(Optional.of(followedUser));
+
+            assertThrows(FollowingAlreadyExistsException.class, () -> {
+                userService.createFollowRelationship(followingUserId, followedUserId);
+            });
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteFollowRelationship Tests")
+    class DeleteFollowRelationshipTests {
+
+        @Test
+        @DisplayName("Should delete follow relationship successfully")
+        void shouldDeleteFollowRelationshipSuccessfully() {
+            String followingUserId = "user-1";
+            String followedUserId = "user-2";
+
+            User followedUser = User.builder().id(followedUserId).build();
+            HashSet<User> followingSet = new HashSet<>();
+            followingSet.add(followedUser);
+            User followingUser = User.builder().id(followingUserId).following(followingSet).build();
+
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.of(followingUser));
+            when(userRepository.findById(followedUserId)).thenReturn(Optional.of(followedUser));
+
+            assertDoesNotThrow(() -> userService.deleteFollowRelationship(followingUserId, followedUserId));
+
+            assertFalse(followingUser.getFollowing().contains(followedUser));
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when user tries to unfollow themself")
+        void shouldThrowExceptionWhenFollowingAndFollowedUsersAreSame() {
+            String userId = "user-1";
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                userService.deleteFollowRelationship(userId, userId);
+            });
+
+            assertEquals("Following and followed users cannot be the same", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when following user is not found")
+        void shouldThrowUserNotFoundExceptionWhenFollowingUserNotFound() {
+            String followingUserId = "non-existent-user";
+            String followedUserId = "user-2";
+
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.empty());
+
+            assertThrows(UserNotFoundException.class, () -> {
+                userService.deleteFollowRelationship(followingUserId, followedUserId);
+            });
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when followed user is not found")
+        void shouldThrowUserNotFoundExceptionWhenFollowedUserNotFound() {
+            String followingUserId = "user-1";
+            String followedUserId = "non-existent-user";
+
+            User followingUser = User.builder().id(followingUserId).build();
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.of(followingUser));
+            when(userRepository.findById(followedUserId)).thenReturn(Optional.empty());
+
+            assertThrows(UserNotFoundException.class, () -> {
+                userService.deleteFollowRelationship(followingUserId, followedUserId);
+            });
+        }
+
+        @Test
+        @DisplayName("Should throw FollowingNotFoundException when relationship does not exist")
+        void shouldThrowFollowingNotFoundExceptionWhenRelationshipDoesNotExist() {
+            String followingUserId = "user-1";
+            String followedUserId = "user-2";
+
+            User followingUser = User.builder().id(followingUserId).following(new HashSet<>()).build();
+            User followedUser = User.builder().id(followedUserId).build();
+
+            when(userRepository.findById(followingUserId)).thenReturn(Optional.of(followingUser));
+            when(userRepository.findById(followedUserId)).thenReturn(Optional.of(followedUser));
+
+            assertThrows(FollowingNotFoundException.class, () -> {
+                userService.deleteFollowRelationship(followingUserId, followedUserId);
+            });
         }
     }
 }

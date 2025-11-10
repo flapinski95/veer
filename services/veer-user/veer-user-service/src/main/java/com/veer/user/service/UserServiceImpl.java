@@ -3,6 +3,8 @@ package com.veer.user.service;
 import com.veer.user.repository.UserRepository;
 import com.veer.user.model.exception.UserAlreadyExistsException;
 import com.veer.user.model.exception.UserNotFoundException;
+import com.veer.user.model.exception.FollowingAlreadyExistsException;
+import com.veer.user.model.exception.FollowingNotFoundException;
 import com.veer.user.UserMapper;
 import com.veer.user.model.User;
 import com.veer.user.model.dto.CreateUserDto;
@@ -80,5 +82,68 @@ public class UserServiceImpl implements UserService {
             user.setProfilePicture(updateUserDto.getProfilePicture());
 
         return user;
+    }
+
+    @Transactional
+    @Override
+    public ResponseUserDto createFollowRelationship(String followingUserId, String followedUserId) {
+        if (followingUserId.equals(followedUserId)) {
+            throw new IllegalArgumentException(
+                "Following and followed users cannot be the same"
+            );
+        }
+
+        User followingUser = repository.findById(followingUserId)
+            .orElseThrow(() -> new UserNotFoundException(
+                "User " + followingUserId + " not found"
+            ));
+        User followedUser = repository.findById(followedUserId)
+            .orElseThrow(() -> new UserNotFoundException(
+                "User " + followedUserId + " not found"
+            ));
+
+        /*
+         * Only need to modify the "owning" side of the relationship. 
+         * The following set is the owning side because it defines 
+         * the @JoinTable. When a user is added to this set, JPA inserts 
+         * a new row into the followers join table.
+         * Look: User.java
+         */
+        boolean alreadyFollowing = !followingUser.getFollowing().add(followedUser);
+
+        if (alreadyFollowing) {
+            throw new FollowingAlreadyExistsException(
+                "User " + followingUserId + " already follows user " + followedUserId
+            );
+        }
+
+        return UserMapper.toResponseUserDto(followedUser);
+    }
+
+    @Transactional
+    @Override
+    public void deleteFollowRelationship(String followingUserId, String followedUserId) {
+        if (followingUserId.equals(followedUserId)) {
+            throw new IllegalArgumentException(
+                "Following and followed users cannot be the same"
+            );
+        }
+
+        User followingUser = repository.findById(followingUserId)
+            .orElseThrow(() -> new UserNotFoundException(
+                "User " + followingUserId + " not found"
+            ));
+        User followedUser = repository.findById(followedUserId)
+            .orElseThrow(() -> new UserNotFoundException(
+                "User " + followedUserId + " not found"
+            ));
+
+        boolean notFollowing = !followingUser.getFollowing().remove(followedUser);
+
+        if (notFollowing) {
+            throw new FollowingNotFoundException(
+                "User " + followingUserId + " does not follow user " + followedUserId
+            );
+        }
     }
 }

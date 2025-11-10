@@ -54,9 +54,13 @@ public class User {
     /*
     * Tells Hibernate that this relationship is already defined and managed
     * by the 'following' field on the other side.
-    * It doesn't create a new table.
+    * JPA will query the followers table's followed_id column to find all 
+    * the follower_ids that point to the current user
     */
-    @ManyToMany(mappedBy = "following", fetch = FetchType.LAZY)
+    @ManyToMany(
+        mappedBy = "following", 
+        fetch = FetchType.LAZY // don't fetch until needed
+    )
     @Builder.Default
     private Set<User> followers = new HashSet<>();
 
