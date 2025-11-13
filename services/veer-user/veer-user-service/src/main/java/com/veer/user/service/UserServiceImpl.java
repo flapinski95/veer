@@ -103,20 +103,26 @@ public class UserServiceImpl implements UserService {
             ));
 
         /*
-         * Only need to modify the "owning" side of the relationship. 
+         * Modifying the following set (the owning side of the relationship).
          * The following set is the owning side because it defines 
          * the @JoinTable. When a user is added to this set, JPA inserts 
          * a new row into the followers join table.
          * Look: User.java
          */
         boolean alreadyFollowing = !followingUser.getFollowing().add(followedUser);
-
         if (alreadyFollowing) {
             throw new FollowingAlreadyExistsException(
                 "User " + followingUserId + " already follows user " + followedUserId
             );
         }
 
+        /*
+         * Modifying the followers set (the inverse side of the relationship)
+         * only to keep the relationship synchronized in memory. The database
+         * will be updated automatically when the transaction is committed 
+         * based on the changes made to the owning side. (Look: line 112)
+         */
+        followedUser.getFollowers().add(followingUser);
         return UserMapper.toResponseUserDto(followedUser);
     }
 
@@ -139,11 +145,12 @@ public class UserServiceImpl implements UserService {
             ));
 
         boolean notFollowing = !followingUser.getFollowing().remove(followedUser);
-
         if (notFollowing) {
             throw new FollowingNotFoundException(
                 "User " + followingUserId + " does not follow user " + followedUserId
             );
         }
+
+        followedUser.getFollowers().remove(followingUser);
     }
 }
