@@ -80,4 +80,22 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{followedUserId}/follow")
+    public ResponseEntity<ResponseUserDto> followUser(
+        @RequestHeader("X-User-Id") @NotBlank String userId,
+        @PathVariable @NotBlank String followedUserId
+    ) {
+        ResponseUserDto followedUser = userService.createFollowRelationship(userId, followedUserId);
+        return ResponseEntity.ok(followedUser);
+    }
+
+    @DeleteMapping("/{followedUserId}/follow")
+    public ResponseEntity<Void> unfollowUser(
+        @RequestHeader("X-User-Id") @NotBlank String userId,
+        @PathVariable @NotBlank String followedUserId
+    ) {
+        userService.deleteFollowRelationship(userId, followedUserId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

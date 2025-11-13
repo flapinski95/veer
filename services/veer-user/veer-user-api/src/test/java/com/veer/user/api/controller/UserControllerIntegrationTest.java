@@ -1026,4 +1026,238 @@ class UserControllerIntegrationTest {
             verify(userRepository, times(1)).delete(any(User.class));
         }
     }
+
+    @Nested
+    @DisplayName("POST /api/user/{followedUserId}/follow - Follow User Tests")
+    class FollowUserTests {
+
+        @Test
+        @DisplayName("Should follow user successfully")
+        void shouldFollowUserSuccessfully() throws Exception {
+            String followerId = "follower-user";
+            String followedId = "followed-user";
+
+            User follower = User.builder()
+                .id(followerId)
+                .username("follower")
+                .email("follower@example.com")
+                .country("Country")
+                .followers(new HashSet<>()).following(new HashSet<>())
+                .build();
+            User followed = User.builder()
+                .id(followedId)
+                .username("followed")
+                .email("followed@example.com")
+                .country("Country")
+                .followers(new HashSet<>()).following(new HashSet<>())
+                .build();
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.of(follower));
+            when(userRepository.findById(followedId)).thenReturn(Optional.of(followed));
+            when(userRepository.save(any(User.class))).thenAnswer(
+                invocation -> invocation.getArgument(0)
+            );
+
+            mockMvc.perform(post("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(followedId)))
+                .andExpect(jsonPath("$.username", is("followed")))
+                .andExpect(jsonPath("$.followerCount", is(1)));
+
+            verify(userRepository, times(1)).findById(followerId);
+            verify(userRepository, times(1)).findById(followedId);
+        }
+
+        @Test
+        @DisplayName("Should return 404 when follower not found")
+        void shouldReturnNotFoundWhenFollowerNotFound() throws Exception {
+            String followerId = "non-existent-follower";
+            String followedId = "followed-user";
+
+            User followed = User.builder().id(followedId).build();
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.empty());
+            when(userRepository.findById(followedId)).thenReturn(Optional.of(followed));
+
+            mockMvc.perform(post("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isNotFound());
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 404 when followed user not found")
+        void shouldReturnNotFoundWhenFollowedNotFound() throws Exception {
+            String followerId = "follower-user";
+            String followedId = "non-existent-followed";
+
+            User follower = User.builder().id(followerId).followers(new HashSet<>()).following(new HashSet<>()).build();
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.of(follower));
+            when(userRepository.findById(followedId)).thenReturn(Optional.empty());
+
+            mockMvc.perform(post("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isNotFound());
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 409 when already following")
+        void shouldReturnConflictWhenAlreadyFollowing() throws Exception {
+            String followerId = "follower-user";
+            String followedId = "followed-user";
+
+            User follower = User.builder().id(followerId).username("follower").followers(new HashSet<>()).following(new HashSet<>()).build();
+            User followed = User.builder().id(followedId).username("followed").followers(new HashSet<>()).following(new HashSet<>()).build();
+
+            follower.getFollowing().add(followed);
+            followed.getFollowers().add(follower);
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.of(follower));
+            when(userRepository.findById(followedId)).thenReturn(Optional.of(followed));
+
+            mockMvc.perform(post("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isConflict());
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when X-User-Id header is missing")
+        void shouldReturnBadRequestWhenHeaderMissing() throws Exception {
+            mockMvc.perform(post("/api/user/{followedUserId}/follow", "some-user"))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when trying to follow yourself")
+        void shouldReturnBadRequestWhenTryingToFollowYourself() throws Exception {
+            String followerId = "follower-user";
+            String followedId = followerId;
+
+            User follower = User.builder()
+                .id(followerId)
+                .username("follower")
+                .email("follower@example.com")
+                .country("Country")
+                .followers(new HashSet<>()).following(new HashSet<>())
+                .build();
+            User followed = User.builder()
+                .id(followedId)
+                .username("followed")
+                .email("followed@example.com")
+                .country("Country")
+                .followers(new HashSet<>()).following(new HashSet<>())
+                .build();
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.of(follower));
+            when(userRepository.findById(followedId)).thenReturn(Optional.of(followed));
+
+            mockMvc.perform(post("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/user/{followedUserId}/follow - Unfollow User Tests")
+    class UnfollowUserTests {
+
+        @Test
+        @DisplayName("Should unfollow user successfully")
+        void shouldUnfollowUserSuccessfully() throws Exception {
+            String followerId = "follower-user";
+            String followedId = "followed-user";
+
+            User follower = User.builder().id(followerId).username("follower").email("follower@example.com").country("Country").followers(new HashSet<>()).following(new HashSet<>()).build();
+            User followed = User.builder().id(followedId).username("followed").email("followed@example.com").country("Country").followers(new HashSet<>()).following(new HashSet<>()).build();
+
+            follower.getFollowing().add(followed);
+            followed.getFollowers().add(follower);
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.of(follower));
+            when(userRepository.findById(followedId)).thenReturn(Optional.of(followed));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            mockMvc.perform(delete("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isNoContent());
+
+            verify(userRepository, times(1)).findById(followerId);
+            verify(userRepository, times(1)).findById(followedId);
+        }
+
+        @Test
+        @DisplayName("Should return 404 when follower not found")
+        void shouldReturnNotFoundWhenFollowerNotFound() throws Exception {
+            String followerId = "non-existent-follower";
+            String followedId = "followed-user";
+
+            User followed = User.builder().id(followedId).build();
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.empty());
+            when(userRepository.findById(followedId)).thenReturn(Optional.of(followed));
+
+            mockMvc.perform(delete("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isNotFound());
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 404 when followed user not found")
+        void shouldReturnNotFoundWhenFollowedNotFound() throws Exception {
+            String followerId = "follower-user";
+            String followedId = "non-existent-followed";
+
+            User follower = User.builder().id(followerId).followers(new HashSet<>()).following(new HashSet<>()).build();
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.of(follower));
+            when(userRepository.findById(followedId)).thenReturn(Optional.empty());
+
+            mockMvc.perform(delete("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isNotFound());
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 404 when not following")
+        void shouldReturnNotFoundWhenNotFollowing() throws Exception {
+            String followerId = "follower-user";
+            String followedId = "followed-user";
+
+            User follower = User.builder().id(followerId).username("follower").followers(new HashSet<>()).following(new HashSet<>()).build();
+            User followed = User.builder().id(followedId).username("followed").followers(new HashSet<>()).following(new HashSet<>()).build();
+
+            when(userRepository.findById(followerId)).thenReturn(Optional.of(follower));
+            when(userRepository.findById(followedId)).thenReturn(Optional.of(followed));
+
+            mockMvc.perform(delete("/api/user/{followedUserId}/follow", followedId)
+                    .header("X-User-Id", followerId))
+                .andExpect(status().isNotFound());
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when X-User-Id header is missing")
+        void shouldReturnBadRequestWhenHeaderMissing() throws Exception {
+            mockMvc.perform(delete("/api/user/{followedUserId}/follow", "some-user"))
+                .andExpect(status().isBadRequest());
+
+            verify(userRepository, never()).save(any());
+        }
+    }
 }
