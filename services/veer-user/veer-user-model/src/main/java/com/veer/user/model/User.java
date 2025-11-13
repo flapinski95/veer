@@ -15,7 +15,9 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Data
@@ -49,6 +51,8 @@ public class User {
         joinColumns = @JoinColumn(name = "follower_id"),
         inverseJoinColumns = @JoinColumn(name = "followed_id"))
     @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<User> following = new HashSet<>();
 
     /*
@@ -62,6 +66,8 @@ public class User {
         fetch = FetchType.LAZY // don't fetch until needed
     )
     @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<User> followers = new HashSet<>();
 
     @Column(name = "profile_picture_url")
