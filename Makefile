@@ -1,5 +1,5 @@
 KEYCLOAK_CONTAINER=veer-keycloak
-EXPORT_DIR=/opt/keycloak/export
+EXPORT_DIR=/opt/keycloak/import
 EXPORT_FILE=veer-realm.json
 
 .PHONY: export-config import-config
