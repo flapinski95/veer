@@ -8,12 +8,7 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
 
-  # JPA (Hibernate) configuration
   jpa:
-    # Tells Hibernate to use the PostgreSQL dialect
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    
-    # Data Definition Language settings
     hibernate:
       # 'update': Automatically updates the schema (adds columns, tables),
       # but does not delete data.

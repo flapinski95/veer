@@ -60,11 +60,12 @@ services:
     build: ./services/veer-user
     container_name: veer-user-service
     restart: always
+    # no ports exposed for the internal user service
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: veer_db
-      POSTGRES_USER: admin
+      POSTGRES_HOST:     postgres
+      POSTGRES_PORT:     5432
+      POSTGRES_DB:       veer_db
+      POSTGRES_USER:     admin
       POSTGRES_PASSWORD: secret
     depends_on:
       - postgres
