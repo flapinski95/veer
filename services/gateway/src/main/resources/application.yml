@@ -20,5 +20,5 @@ management:
 
 services:
   user:
-    uri: http://user-service:3003
+    uri: http://user-service:3002
 
