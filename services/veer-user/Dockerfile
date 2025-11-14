@@ -7,12 +7,9 @@ COPY veer-user-model/pom.xml   ./veer-user-model/pom.xml
 COPY veer-user-service/pom.xml ./veer-user-service/pom.xml
 
 RUN mvn dependency:go-offline
-RUN mvn dependency:go-offline -pl veer-user-model   -am
-RUN mvn dependency:go-offline -pl veer-user-service -am
-RUN mvn dependency:go-offline -pl veer-user-api     -am
 
-COPY veer-user-model/src ./veer-user-model/src
-COPY veer-user-api/src ./veer-user-api/src
+COPY veer-user-model/src   ./veer-user-model/src
+COPY veer-user-api/src     ./veer-user-api/src
 COPY veer-user-service/src ./veer-user-service/src
 
 RUN mvn clean package -DskipTests
