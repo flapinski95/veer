@@ -19,11 +19,13 @@ public class AddUserDetailsHeaderGatewayFilterFactory extends AbstractGatewayFil
                 .map(ctx -> ctx.getAuthentication().getPrincipal())
                 .cast(Jwt.class)
                 .flatMap(jwt -> {
-                    exchange.getRequest().mutate()
+                    var mutatedRequest = exchange.getRequest().mutate()
                             .header("X-User-Id", jwt.getSubject())
                             .header("X-User-Email", jwt.getClaimAsString("email"))
+                            .header("X-User-Name", jwt.getClaimAsString("preferred_username"))
+                            .header("X-User-Country", jwt.getClaimAsString("locale"))
                             .build();
-                    return chain.filter(exchange);
+                    return chain.filter(exchange.mutate().request(mutatedRequest).build());
                 })
                 .switchIfEmpty(chain.filter(exchange));
     }

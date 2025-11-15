@@ -31,6 +31,8 @@ public class JwtTestUtils {
                 .issuer(issuer) // Must match issuer in tests
                 .subject(UUID.randomUUID().toString())
                 .claim("email", "test-user@veer.com")
+                .claim("username", "test-user")
+                .claim("country", "Poland")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .audience(Collections.singletonList("veer-client"))

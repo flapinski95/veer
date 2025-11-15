@@ -114,6 +114,8 @@ class GatewayIntegrationTests {
         assertThat(lastProxiedRequest.getPath()).isEqualTo("/api/user/" + userId);
         assertThat(lastProxiedRequest.getHeader("X-User-Id")).isNotNull();
         assertThat(lastProxiedRequest.getHeader("X-User-Email")).isEqualTo("test-user@veer.com");
+        assertThat(lastProxiedRequest.getHeader("X-User-Name")).isEqualTo("test-user");
+        assertThat(lastProxiedRequest.getHeader("X-User-Country")).isEqualTo("Poland");
     }
 
     private static String readResource(String path) {
