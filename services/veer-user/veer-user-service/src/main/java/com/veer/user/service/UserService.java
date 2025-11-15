@@ -10,6 +10,8 @@ public interface UserService {
 
     public abstract ResponseUserDto getUserById(String userId);
 
+    public abstract ResponseUserDto getUserPublicDataById(String userId);
+
     public abstract void deleteUserById(String userId);
 
     public abstract ResponseUserDto updateUser(UpdateUserDto updateUserDto);

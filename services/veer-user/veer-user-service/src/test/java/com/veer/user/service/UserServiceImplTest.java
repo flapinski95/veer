@@ -480,6 +480,7 @@ class UserServiceImplTest {
 
             assertNotNull(result);
             assertEquals(followedUserId, result.getId());
+            assertNull(result.getEmail());
             assertTrue(followingUser.getFollowing().contains(followedUser));
         }
 
@@ -623,5 +624,52 @@ class UserServiceImplTest {
             });
         }
     }
-}
 
+    @Nested
+    @DisplayName("getUserPublicDataById Tests")
+    class GetUserPublicDataByIdTests {
+
+        @Test
+        @DisplayName("Should get user public data by ID successfully and not return email")
+        void shouldGetUserPublicDataByIdSuccessfully() {
+            String userId = "user-public";
+            User user = User.builder()
+                .id(userId)
+                .email("public@example.com")
+                .username("publicuser")
+                .country("USA")
+                .createdAt(Instant.now())
+                .following(new HashSet<>())
+                .followers(new HashSet<>())
+                .build();
+
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+            ResponseUserDto result = userService.getUserPublicDataById(userId);
+
+            assertNotNull(result);
+            assertEquals(userId, result.getId());
+            assertNull(result.getEmail()); // Should not return private data
+            assertEquals("publicuser", result.getUsername());
+            assertEquals(0, result.getFollowingCount());
+            assertEquals(0, result.getFollowerCount());
+
+            verify(userRepository, times(1)).findById(userId);
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when user not found for public data")
+        void shouldThrowUserNotFoundExceptionWhenUserNotFound() {
+            String userId = "non-existent-user";
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+                userService.getUserPublicDataById(userId);
+            });
+
+            assertTrue(exception.getMessage().contains("User " + userId + " not found"));
+
+            verify(userRepository, times(1)).findById(userId);
+        }
+    }
+}

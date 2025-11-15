@@ -46,6 +46,16 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toResponseUserDto(user);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public ResponseUserDto getUserPublicDataById(String userId) {
+        User user = repository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(
+                "User " + userId + " not found"
+            ));
+        return UserMapper.toResponsePublicUserDto(user);
+    }
+
     @Transactional
     @Override
     public void deleteUserById(String userId) {
@@ -123,7 +133,7 @@ public class UserServiceImpl implements UserService {
          * based on the changes made to the owning side. (Look: line 112)
          */
         followedUser.getFollowers().add(followingUser);
-        return UserMapper.toResponseUserDto(followedUser);
+        return UserMapper.toResponsePublicUserDto(followedUser);
     }
 
     @Transactional
