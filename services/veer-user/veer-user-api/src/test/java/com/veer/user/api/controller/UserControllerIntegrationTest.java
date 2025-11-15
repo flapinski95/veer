@@ -1065,6 +1065,7 @@ class UserControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(followedId)))
                 .andExpect(jsonPath("$.username", is("followed")))
+                .andExpect(jsonPath("$.email", is(nullValue())))
                 .andExpect(jsonPath("$.followerCount", is(1)));
 
             verify(userRepository, times(1)).findById(followerId);

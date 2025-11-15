@@ -141,9 +141,7 @@ public class UserController {
         @Parameter(description = "User ID to retrieve", required = true)
         @PathVariable @NotBlank String userId
     ) {
-        ResponseUserDto user = userService.getUserById(userId);
-
-        user.setEmail(null); // for now the only private data is the email
+        ResponseUserDto user = userService.getUserPublicDataById(userId);
 
         return ResponseEntity.ok(user);
     }
