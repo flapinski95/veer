@@ -29,4 +29,17 @@ public class UserMapper {
             .build();
     }
 
+    public static ResponseUserDto toResponsePublicUserDto(User user) {
+                return ResponseUserDto.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .bio(user.getBio())
+            .country(user.getCountry())
+            .followingCount(user.getFollowing() != null ? user.getFollowing().size() : 0)
+            .followerCount(user.getFollowers() != null ? user.getFollowers().size() : 0)
+            .profilePicture(user.getProfilePicture())
+            .joinedAt(user.getCreatedAt())
+            .build();
+    }
+
 }
