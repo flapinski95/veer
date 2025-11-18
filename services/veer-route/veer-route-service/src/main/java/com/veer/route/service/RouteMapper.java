@@ -1,8 +1,9 @@
-package com.veer.route;
+package com.veer.route.service;
 
 import com.veer.route.model.Route;
 import com.veer.route.model.dto.CreateRouteDto;
 import com.veer.route.model.dto.ResponseRouteDto;
+import com.veer.route.model.dto.UpdateRouteDto;
 
 public class RouteMapper {
 

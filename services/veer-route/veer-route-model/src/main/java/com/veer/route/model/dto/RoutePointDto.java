@@ -1,4 +1,4 @@
-package main.java.com.veer.route.model.dto;
+package com.veer.route.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

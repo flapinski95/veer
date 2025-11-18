@@ -35,6 +35,5 @@ public class CreateRouteDto {
 
     @Builder.Default
     private Boolean isPublic = false;
-
 }
 

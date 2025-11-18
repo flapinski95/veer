@@ -1,0 +1,58 @@
+# -------------------------
+# IntelliJ / JetBrains
+# -------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+workspace.xml
+
+# -------------------------
+# Maven
+# -------------------------
+target/
+**/target/
+
+# Maven wrapper (jeśli nie używasz)
+.mvn/wrapper/maven-wrapper.jar
+
+# -------------------------
+# Logs
+# -------------------------
+*.log
+logs/
+**/logs/
+
+# -------------------------
+# OS files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Java / Build garbage
+# -------------------------
+*.class
+*.jar
+*.war
+*.ear
+
+# -------------------------
+# Docker
+# -------------------------
+**/.dockerignore
+**/docker-compose.override.yml
+
+# -------------------------
+# Node (gdyby RN coś wygenerował)
+# -------------------------
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# -------------------------
+# VSCode (jeśli używasz)
+# -------------------------
+.vscode/

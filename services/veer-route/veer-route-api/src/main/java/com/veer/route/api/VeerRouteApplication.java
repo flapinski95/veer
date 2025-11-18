@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EntityScan("com.veer.route.model")
-@ComponentScan("com.veer.route")
-@EnableJpaRepositories("com.veer.route.repository")
+@ComponentScan("com.veer.route.service")
+@EnableJpaRepositories("com.veer.route.service.repository")
 public class VeerRouteApplication {
 
     public static void main(String[] args) {

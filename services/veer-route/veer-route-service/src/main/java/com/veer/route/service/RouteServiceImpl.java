@@ -1,10 +1,9 @@
 package com.veer.route.service;
 
 import org.springframework.stereotype.Service;
-import com.veer.route.repository.RouteRepository;
+import com.veer.route.service.repository.RouteRepository;
 import com.veer.route.model.exception.RouteAlreadyExistsException;
 import com.veer.route.model.exception.RouteNotFoundException;
-import com.veer.route.RouteMapper;
 import com.veer.route.model.Route;
 import com.veer.route.model.dto.CreateRouteDto;
 import com.veer.route.model.dto.ResponseRouteDto;
