@@ -27,24 +27,37 @@ services:
       - start-dev
       - --features=preview
       - --hostname-strict=false
+      - --hostname-path=/
       - --proxy-headers=xforwarded
+      - --spi-login-action-token-generated-by-application-url=true
+      - --spi-theme-cache-themes=false
+      - --spi-theme-cache-templates=false
+      - --spi-theme-static-max-age=-1
       - --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: secret
+      KC_FEATURES: "preview"
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: secret
+      KC_HOSTNAME_STRICT: "false"
+      KC_PROXY: "edge"
+      TZ: Europe/Warsaw
+      KC_CLOCK_SKEW: 300
+      KC_SPI_ACTION_TOKEN_HANDLER_VERIFY_EMAIL_EXPIRATION: 36000
+
     volumes:
-      - ./services/keycloak/export:/opt/keycloak/data/import
+      - /etc/localtime:/etc/localtime:ro
+      - ./services/keycloak/export:/opt/keycloak/import
+      - ./services/keycloak/themes:/opt/keycloak/themes
     ports:
       - "8180:8080"
     depends_on:
       - postgres
     networks:
       - veer
-
   gateway:
     build: ./services/gateway
     container_name: veer-gateway

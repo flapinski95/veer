@@ -1,86 +1,54 @@
-// src/screens/LoginPage.tsx
-import React from 'react';
-import {
-  View,
-  Text,
-  Button,
-  Pressable,
-  StyleSheet,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from 'react';
+import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { authorize } from 'react-native-app-auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { oidc } from '../auth/config';
 
-type Props = { navigation: any };
+export default function LoginPage({ onLogin }: { onLogin: () => void }) {
+  const [loading, setLoading] = useState(false);
 
-const LoginPage: React.FC<Props> = ({ navigation }) => {
-  const { colors, toggleTheme, theme } = useTheme();
-  const { login, logout, tokens, loading } = useAuth();
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const result = await authorize(oidc);
 
-  const onLogin = async () => {
-    await login();               // uruchamia Keycloak (PKCE)
-    // jeśli chcesz automatycznie przejść dalej po sukcesie:
-    // if (tokens) navigation.replace('Home');
+      await AsyncStorage.setItem('auth', JSON.stringify(result));
+      onLogin();
+    } catch (e) {
+      console.error('Login error', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Login</Text>
-
-        <Pressable
-          onPress={toggleTheme}
-          style={[styles.iconBtn, { borderColor: colors.border }]}
-          accessibilityRole="button"
-          accessibilityLabel="Toggle theme"
-          hitSlop={10}
-        >
-          <Text style={{ fontSize: 18, color: colors.text }}>
-            {theme === 'dark' ? '🌙' : '☀️'}
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* Body */}
-      <View style={{ gap: 12 }}>
-        {!tokens ? (
-          <Button
-            title={loading ? 'Loading…' : 'Continue with Keycloak'}
-            onPress={onLogin}
-            color={colors.primary}
-            disabled={loading}
-          />
-        ) : (
-          <>
-            <Text style={{ color: colors.text }}>
-              ✅ Jesteś zalogowany.
-            </Text>
-            <Button
-              title="Go to Home"
-              onPress={() => navigation.replace('Home')}
-              color={colors.primary}
-            />
-            <Button
-              title="Logout"
-              onPress={logout}
-              color={colors.primary}
-            />
-          </>
-        )}
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Veer – Logowanie</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" />
+      ) : (
+        <View style={styles.buttonContainer}>
+          <Button title="Zaloguj przez Keycloak" onPress={handleLogin} />
+        </View>
+      )}
+    </View>
   );
-};
-
-export default LoginPage;
+}
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, padding: 20 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
-  title: { flex: 1, fontSize: 24, fontWeight: '700' },
-  iconBtn: { borderRadius: 12, padding: 8, borderWidth: StyleSheet.hairlineWidth },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    marginBottom: 24,
+    fontWeight: '600',
+  },
+  buttonContainer: {
+    width: '80%',
+    marginVertical: 8,
+  },
 });

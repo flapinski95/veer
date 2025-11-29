@@ -1,0 +1,12 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/veer
+
+services:
+  auth:
+    uri: http://localhost:3002
+  user:
+    uri: http://localhost:3003

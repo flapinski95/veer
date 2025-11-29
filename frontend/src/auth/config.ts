@@ -1,13 +1,11 @@
-// src/auth/config.ts
-import { HOST } from '@env';
+import { HOST } from '@env'; // np. 10.0.2.2 dla emulatora Androida
 
 export const oidc = {
-  issuer: `http://${HOST}:8180/realms/veer`,
+  issuer: `http://${HOST}:8180/realms/veer`, // Twój realm z Keycloaka
   clientId: 'veer-mobile',
-  clientSecret: '',              // ⬅️ WAŻNE: pusty string, nigdy null/undefined
+  clientSecret: '', // zostaw pusty
   redirectUrl: 'veer://callback',
   scopes: ['openid', 'profile', 'email', 'offline_access'],
-  dangerouslyAllowInsecureHttpRequests: true, // dev over http
-  // (opcjonalnie, ale bezpieczne)
-  additionalParameters: {},      // upewnia, że nie poleci NSNull
+  dangerouslyAllowInsecureHttpRequests: true, 
+  clockSkew: 60,
 };
