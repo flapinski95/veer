@@ -6,6 +6,8 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 public class AddUserDetailsHeaderGatewayFilterFactory extends AbstractGatewayFilterFactory<AddUserDetailsHeaderGatewayFilterFactory.Config> {
 
@@ -19,11 +21,13 @@ public class AddUserDetailsHeaderGatewayFilterFactory extends AbstractGatewayFil
                 .map(ctx -> ctx.getAuthentication().getPrincipal())
                 .cast(Jwt.class)
                 .flatMap(jwt -> {
+                    Map<String, Object> address = jwt.getClaim("address");
+                    String country = address != null ? (String) address.get("country") : null;
                     var mutatedRequest = exchange.getRequest().mutate()
                             .header("X-User-Id", jwt.getSubject())
                             .header("X-User-Email", jwt.getClaimAsString("email"))
                             .header("X-User-Name", jwt.getClaimAsString("preferred_username"))
-                            .header("X-User-Country", jwt.getClaimAsString("locale"))
+                            .header("X-User-Country", country)
                             .build();
                     return chain.filter(exchange.mutate().request(mutatedRequest).build());
                 })

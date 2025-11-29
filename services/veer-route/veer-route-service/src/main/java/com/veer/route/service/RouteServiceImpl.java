@@ -8,6 +8,9 @@ import com.veer.route.model.exception.RouteNotFoundException;
 import com.veer.route.repository.RouteRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class RouteServiceImpl implements RouteService {
 
@@ -57,6 +60,14 @@ public class RouteServiceImpl implements RouteService {
         Route savedRoute = repository.save(updatedRoute);
         
         return RouteMapper.toResponseRouteDto(savedRoute);
+    }
+
+    @Override
+    public List<ResponseRouteDto> getRoutesByUserId(String userId) {
+        List<Route> routes = repository.findByCreatedBy(userId);
+        return routes.stream()
+            .map(RouteMapper::toResponseRouteDto)
+            .collect(Collectors.toList());
     }
 
     private Route updateRouteEntity(Route route, UpdateRouteDto updateRouteDto) {

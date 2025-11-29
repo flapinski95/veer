@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/route")
 @Validated
@@ -41,6 +43,14 @@ public class RouteController {
     ) {
         ResponseRouteDto route = routeService.getRouteById(routeId);
         return ResponseEntity.ok(route);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<ResponseRouteDto>> getRoutesByUserId(
+        @PathVariable @NotBlank String userId
+    ) {
+        List<ResponseRouteDto> routes = routeService.getRoutesByUserId(userId);
+        return ResponseEntity.ok(routes);
     }
 
     @PutMapping("/{routeId}")
