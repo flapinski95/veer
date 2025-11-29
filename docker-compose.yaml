@@ -75,8 +75,7 @@ services:
   veer-route:
     build: ./services/veer-route
     container_name: veer-route
-    ports:
-      - "3003:3003"
+    # no ports exposed for the internal user service
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
