@@ -12,10 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-<<<<<<< HEAD
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-=======
->>>>>>> route-service
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -29,20 +26,12 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-<<<<<<< HEAD
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.Mockito.doNothing;
 
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
-=======
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(UserController.class)
->>>>>>> route-service
 @Import({UserServiceImpl.class, GlobalExceptionHandler.class})
 @DisplayName("UserController Integration Tests")
 class UserControllerIntegrationTest {
@@ -50,12 +39,9 @@ class UserControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-<<<<<<< HEAD
     @Autowired
     private ObjectMapper objectMapper;
 
-=======
->>>>>>> route-service
     @MockBean
     private UserRepository userRepository;
 
@@ -527,7 +513,6 @@ class UserControllerIntegrationTest {
             verify(userRepository, times(1)).findById(userId);
         }
     }
-<<<<<<< HEAD
 
     @Nested
     @DisplayName("PATCH /api/user - Update User Tests")
@@ -1278,6 +1263,4 @@ class UserControllerIntegrationTest {
             verify(userRepository, never()).save(any());
         }
     }
-=======
->>>>>>> route-service
 }

@@ -6,12 +6,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # The public-facing address of the token issuer (Keycloak), as seen by the client.
-          # This must match the 'iss' claim in the JWT.
-          issuer-uri: http://localhost:8180/realms/veer
-          # The internal network address for the Gateway to fetch public keys (JWKs)
-          # from Keycloak to verify the JWT signature.
-          jwk-set-uri: http://keycloak:8080/realms/veer/protocol/openid-connect/certs
+          issuer-uri: http://keycloak:8080/realms/veer
 
 management:
   endpoints:

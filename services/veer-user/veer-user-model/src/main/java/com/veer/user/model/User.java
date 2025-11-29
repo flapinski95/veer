@@ -51,17 +51,13 @@ public class User {
         joinColumns = @JoinColumn(name = "follower_id"),
         inverseJoinColumns = @JoinColumn(name = "followed_id"))
     @Builder.Default
-<<<<<<< HEAD
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-=======
->>>>>>> route-service
     private Set<User> following = new HashSet<>();
 
     /*
     * Tells Hibernate that this relationship is already defined and managed
     * by the 'following' field on the other side.
-<<<<<<< HEAD
     * JPA will query the followers table's followed_id column to find all 
     * the follower_ids that point to the current user
     */
@@ -72,12 +68,6 @@ public class User {
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-=======
-    * It doesn't create a new table.
-    */
-    @ManyToMany(mappedBy = "following", fetch = FetchType.LAZY)
-    @Builder.Default
->>>>>>> route-service
     private Set<User> followers = new HashSet<>();
 
     @Column(name = "profile_picture_url")

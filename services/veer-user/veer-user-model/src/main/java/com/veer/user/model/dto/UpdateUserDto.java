@@ -6,17 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-<<<<<<< HEAD
-=======
-import jakarta.validation.constraints.NotBlank;
->>>>>>> route-service
 import jakarta.validation.constraints.Size;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-<<<<<<< HEAD
 @Schema(description = "Data transfer object for updating user profile information")
 public class UpdateUserDto {
 
@@ -45,23 +40,6 @@ public class UpdateUserDto {
 
     @Schema(description = "URL to user's profile picture", 
             example = "https://example.com/avatar.jpg")
-=======
-public class UpdateUserDto {
-
-    @NotBlank
-    @Size(max = 36)
-    private String id;
-
-    @Size(min = 3, max = 15)
-    private String username;
-
-    @Size(max = 50)
-    private String bio;
-
-    @Size(min = 3, max = 26)
-    private String country;
-
->>>>>>> route-service
     private String profilePicture;
 
 }

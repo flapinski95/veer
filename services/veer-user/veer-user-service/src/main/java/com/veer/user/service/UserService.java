@@ -16,11 +16,8 @@ public interface UserService {
 
     public abstract ResponseUserDto updateUser(UpdateUserDto updateUserDto);
 
-<<<<<<< HEAD
     public abstract ResponseUserDto createFollowRelationship(String followingUserId, String followedUserId);
 
     public abstract void deleteFollowRelationship(String followingUserId, String followedUserId);
 
-=======
->>>>>>> route-service
 }

@@ -459,7 +459,6 @@ class UserServiceImplTest {
             assertEquals("oldPartialCountry", savedUser.getCountry());
         }
     }
-<<<<<<< HEAD
 
     @Nested
     @DisplayName("createFollowRelationship Tests")
@@ -674,7 +673,3 @@ class UserServiceImplTest {
         }
     }
 }
-=======
-}
-
->>>>>>> route-service

@@ -13,15 +13,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-<<<<<<< HEAD
 import java.util.stream.Collectors;
-=======
->>>>>>> route-service
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-<<<<<<< HEAD
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleAlreadyExistsException(AlreadyExistsException ex) {
         Map<String, Object> errorResponse = buildErrorResponse(
@@ -29,20 +25,10 @@ public class GlobalExceptionHandler {
             "Conflict", 
             ex.getMessage()
         );
-=======
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("timestamp", Instant.now());
-        errorResponse.put("status", HttpStatus.CONFLICT.value());
-        errorResponse.put("error", "Conflict");
-        errorResponse.put("message", ex.getMessage());
->>>>>>> route-service
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
-<<<<<<< HEAD
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
         Map<String, Object> errorResponse = buildErrorResponse(
@@ -50,41 +36,23 @@ public class GlobalExceptionHandler {
             "Not Found", 
             ex.getMessage()
         );
-=======
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException ex) {
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("timestamp", Instant.now());
-        errorResponse.put("status", HttpStatus.NOT_FOUND.value());
-        errorResponse.put("error", "Not Found");
-        errorResponse.put("message", ex.getMessage());
->>>>>>> route-service
         
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<Map<String, Object>> handleMissingRequestHeaderException(MissingRequestHeaderException ex) {
-<<<<<<< HEAD
         Map<String, Object> errorResponse = buildErrorResponse(
             HttpStatus.BAD_REQUEST, 
             "Bad Request", 
             "Required header '" + ex.getHeaderName() + "' is missing"
         );
-=======
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("timestamp", Instant.now());
-        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
-        errorResponse.put("error", "Bad Request");
-        errorResponse.put("message", "Required header '" + ex.getHeaderName() + "' is missing");
->>>>>>> route-service
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraintViolationException(ConstraintViolationException ex) {
-<<<<<<< HEAD
         Map<String, Object> errorResponse = buildErrorResponse(
             HttpStatus.BAD_REQUEST, 
             "Bad Request", 
@@ -109,39 +77,23 @@ public class GlobalExceptionHandler {
             .collect(Collectors.joining(", "));
         
         errorResponse.put("message", "Validation failed: " + errors);
-=======
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("timestamp", Instant.now());
-        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
-        errorResponse.put("error", "Bad Request");
-        errorResponse.put("message", ex.getMessage());
->>>>>>> route-service
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
-<<<<<<< HEAD
         Map<String, Object> errorResponse = buildErrorResponse(
             HttpStatus.BAD_REQUEST, 
             "Bad Request", 
             ex.getMessage()
         );
-=======
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("timestamp", Instant.now());
-        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
-        errorResponse.put("error", "Bad Request");
-        errorResponse.put("message", ex.getMessage());
->>>>>>> route-service
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-<<<<<<< HEAD
         Map<String, Object> errorResponse = buildErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR, 
             "Internal Server Error", 
@@ -159,15 +111,5 @@ public class GlobalExceptionHandler {
         errorResponse.put("message", message);
         return errorResponse;
     }
-=======
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("timestamp", Instant.now());
-        errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        errorResponse.put("error", "Internal Server Error");
-        errorResponse.put("message", "An unexpected error occurred: " + ex.getMessage());
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
->>>>>>> route-service
 }
 

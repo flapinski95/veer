@@ -1,4 +1,4 @@
-package com.veer.gateway;
+package com.veer.gateway.testutils;
 
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
