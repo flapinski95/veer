@@ -17,13 +17,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
-  metrics:
-    binders:
-      processor:
-        enabled: false
+        include: health,info
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
 
 services:
   user:
-    uri: http://user-service:3002
-
+    uri: http://veer-route:3002
+  route:
+    uri: http://veer-route:3003

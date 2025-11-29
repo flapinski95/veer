@@ -7,4 +7,6 @@ spring:
 
 services:
   user:
+    uri: http://localhost:3002
+  route:
     uri: http://localhost:3003
