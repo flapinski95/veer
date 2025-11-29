@@ -1,7 +1,6 @@
-$RNMapboxMapsVersion = '~> 10.14.1'
-source 'https://github.com/CocoaPods/Specs.git'
-source 'https://github.com/mapbox/mapbox-maps-ios.git'
-# Resolve react_native_pods.rb with node to allow for hoisting
+# --------------------------------------------------------------
+# Standard React Native template
+# --------------------------------------------------------------
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
@@ -17,22 +16,33 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+# --------------------------------------------------------------
+# Main Target
+# --------------------------------------------------------------
+pre_install do |installer|
+  $RNMapboxMaps.pre_install(installer)
+end
 target 'frontend' do
   config = use_native_modules!
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # --------------------------------------------------------------
+  # Mapbox v11 – jedyna linia, którą trzeba dodać
+  # --------------------------------------------------------------
 
+  # --------------------------------------------------------------
+  # Post-install
+  # --------------------------------------------------------------
   post_install do |installer|
+    $RNMapboxMaps.post_install(installer)
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+      :mac_catalyst_enabled => false
     )
   end
 end

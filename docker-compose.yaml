@@ -57,8 +57,6 @@ services:
       - start-dev
       - --features=preview
       - --hostname-strict=false
-      - --hostname-url=http://172.16.39.4:8180
-      - --hostname-admin-url=http://172.16.39.4:8180
       - --hostname-path=/
       - --proxy-headers=xforwarded
       - --spi-login-action-token-generated-by-application-url=true
