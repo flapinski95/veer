@@ -1,6 +1,6 @@
 #
 backend/package-lock.json
-
+gateway/target/
 # Logs
 logs
 *.log
