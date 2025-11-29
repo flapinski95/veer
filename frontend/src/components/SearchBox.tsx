@@ -1,10 +1,16 @@
-// src/components/SearchBox.js
-
-import React, { useState, useEffect, useRef } from 'react'; // Dodajemy useEffect i useRef
-import { View, TextInput, Button, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Keyboard, // Importujemy Keyboard
+} from 'react-native';
 import { MAPBOX_PUBLIC_TOKEN } from '@env';
 
-// Definicja typu dla pojedynczego wyniku Geocoding API
 interface Feature {
   id: string;
   place_name: string;
@@ -15,41 +21,31 @@ interface SearchBoxProps {
   onLocationSelected: (coordinate: [number, number]) => void;
 }
 
-// Funkcja Debounce
-// Zapewnia, że funkcja zostanie wywołana tylko raz po upływie podanego opóźnienia
-// od ostatniego wywołania.
 const debounce = (func: (...args: any[]) => void, delay: number) => {
   let timeout: NodeJS.Timeout | null;
   return (...args: any[]) => {
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(() => {
-      func(...args);
-    }, delay);
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
   };
 };
-
 
 const SearchBox: React.FC<SearchBoxProps> = ({ onLocationSelected }) => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Funkcja odpowiedzialna za faktyczne wywołanie API
   const fetchResults = async (text: string) => {
-    if (!text.trim()) {
+    if (!text.trim() || text.length < 3) {
       setSearchResults([]);
+      setLoading(false); // Upewnijmy się, że loading jest wyłączony
       return;
     }
 
     setLoading(true);
-    setSearchResults([]);
-
     try {
       const encodedText = encodeURIComponent(text.trim());
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedText}.json?access_token=${MAPBOX_PUBLIC_TOKEN}`;
-      
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedText}.json?access_token=${MAPBOX_PUBLIC_TOKEN}&limit=5`; // Dodano limit=5 dla optymalizacji
+
       const response = await fetch(url);
       const data = await response.json();
 
@@ -57,71 +53,77 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onLocationSelected }) => {
         setSearchResults(data.features as Feature[]);
       }
     } catch (error) {
-      console.error('Błąd podczas wyszukiwania Mapbox:', error);
+      console.error('Błąd Mapbox Geocoding:', error);
+      setSearchResults([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Używamy useRef do przechowania debounced funkcji
-  // Opóźnienie (np. 400ms) jest dobrym kompromisem między szybkością a oszczędnością API
-  const debouncedSearch = useRef(debounce(fetchResults, 400)).current; 
+  const debouncedSearch = useRef(debounce(fetchResults, 400)).current;
 
-  // Wywołanie API po zmianie searchText, ale z opóźnieniem
   useEffect(() => {
-    // Kiedy searchText się zmienia, wywołujemy debounced funkcję
     debouncedSearch(searchText);
-
-    // Czyszczenie timeoutu przy odmontowywaniu komponentu
-    return () => {
-      // Wymagane, aby upewnić się, że żadne oczekujące wywołanie nie zostanie uruchomione
-      // po opuszczeniu ekranu.
-      if (debouncedSearch.cancel) { 
-         // Opcjonalnie: Jeśli używasz biblioteki debouncing, musisz to dodać.
-         // Ponieważ zdefiniowaliśmy prosty debounce, to czyszczenie nie jest 
-         // technicznie wymagane, ale jest dobrą praktyką.
-      }
-    };
-  }, [searchText, debouncedSearch]); // Dependency array: uruchom po zmianie searchText
+  }, [searchText, debouncedSearch]);
 
   const handleSelect = (feature: Feature) => {
+    Keyboard.dismiss(); // Kluczowe: chowamy klawiaturę po wyborze
     onLocationSelected(feature.center);
+    setSearchText(feature.place_name); // Ustawiamy nazwę miejsca w pasku
+    setSearchResults([]); // Chowamy listę
+  };
+
+  const clearSearch = () => {
+    setSearchText('');
     setSearchResults([]);
-    setSearchText(feature.place_name); 
+    Keyboard.dismiss();
   };
 
   const renderItem = ({ item }: { item: Feature }) => (
     <TouchableOpacity style={styles.resultItem} onPress={() => handleSelect(item)}>
-      <Text style={styles.resultText}>{item.place_name}</Text>
+      <Text style={styles.resultText} numberOfLines={2}>
+        {item.place_name}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <View style={styles.inputContainer}>
+      <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
-          placeholder="Wyszukaj miasto, ulicę, miejsce..."
+          placeholder="Szukaj miejsca..."
           value={searchText}
-          // Zmiana: Teraz tylko aktualizujemy stan searchText
-          onChangeText={setSearchText} 
-          // Usunięto onSubmitEditing, ponieważ teraz szukamy dynamicznie
+          onChangeText={setSearchText}
           autoCapitalize="none"
-          placeholderTextColor="#888"
+          placeholderTextColor="#999"
+          returnKeyType="search" // Zmienia przycisk na klawiaturze na "Szukaj"
+          onSubmitEditing={() => Keyboard.dismiss()} // Chowa klawiaturę po enterze
         />
-        {/* Przycisk Szukaj jest opcjonalny przy dynamicznym wyszukiwaniu, 
-            ale zostawiamy go, aby wyświetlać status ładowania. */}
-        <Button title={loading ? '...' : 'Szukaj'} onPress={() => fetchResults(searchText)} disabled={loading} />
+
+        {/* Wskaźnik ładowania lub przycisk czyszczenia */}
+        <View style={styles.iconContainer}>
+          {loading ? (
+            <ActivityIndicator size="small" color="#007AFF" />
+          ) : searchText.length > 0 ? (
+            <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+               {/* Prosty "X" jako tekst, można podmienić na ikonę */}
+              <Text style={styles.clearButtonText}>✕</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
-      
-      {/* Lista wyników wyszukiwania */}
+
       {searchResults.length > 0 && (
         <View style={styles.resultsBox}>
           <FlatList
             data={searchResults}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
-            keyboardShouldPersistTaps="handled" // Zapobiega zamykaniu klawiatury
+            keyboardShouldPersistTaps="handled"
+            // Kluczowe dla płynności: chowa klawiaturę przy początku scrollowania
+            onScrollBeginDrag={Keyboard.dismiss}
+            showsVerticalScrollIndicator={false}
           />
         </View>
       )}
@@ -129,51 +131,69 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onLocationSelected }) => {
   );
 };
 
-// ... style ...
-
-export default SearchBox;
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 50,
+    top: 60, // Lekko niżej dla iOS notch
     width: '90%',
     alignSelf: 'center',
-    zIndex: 10,
+    zIndex: 20, // Wyższy z-index
   },
-  inputContainer: {
+  inputWrapper: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'white',
-    borderRadius: 8,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    borderRadius: 12, // Bardziej zaokrąglone rogi
+    elevation: 8, // Mocniejszy cień na Android
+    shadowColor: '#000', // Cień na iOS
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
   input: {
     flex: 1,
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
     fontSize: 16,
     color: '#333',
   },
+  iconContainer: {
+    paddingRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 40,
+  },
+  clearButton: {
+    padding: 8,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 20,
+  },
+  clearButtonText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: 'bold',
+  },
   resultsBox: {
-    maxHeight: 200, // Ograniczenie wysokości listy
+    maxHeight: 220,
     backgroundColor: 'white',
-    marginTop: 5,
-    borderRadius: 8,
-    elevation: 3,
+    marginTop: 8,
+    borderRadius: 12,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    overflow: 'hidden', // Ważne dla zaokrąglonych rogów listy
   },
   resultItem: {
-    padding: 12,
+    padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
   resultText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#333',
   },
 });
