@@ -6,13 +6,13 @@ import com.veer.route.model.dto.UpdateRouteDto;
 
 public interface RouteService {
 
-    public abstract ResponseRouteDto createRoute(CreateRouteDto createRouteDto);
+    ResponseRouteDto createRoute(CreateRouteDto createRouteDto);
 
-    public abstract ResponseRouteDto getRouteById(String routeId);
+    ResponseRouteDto getRouteById(String routeId);
 
-    public abstract void deleteRouteById(String routeId);
+    void deleteRouteById(String routeId);
 
-    public abstract ResponseRouteDto updateRoute(UpdateRouteDto updateRouteDto);
+    ResponseRouteDto updateRoute(UpdateRouteDto updateRouteDto);
 
 }
 

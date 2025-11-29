@@ -1,13 +1,12 @@
 package com.veer.route.service;
 
-import org.springframework.stereotype.Service;
-import com.veer.route.service.repository.RouteRepository;
-import com.veer.route.model.exception.RouteAlreadyExistsException;
-import com.veer.route.model.exception.RouteNotFoundException;
 import com.veer.route.model.Route;
 import com.veer.route.model.dto.CreateRouteDto;
 import com.veer.route.model.dto.ResponseRouteDto;
 import com.veer.route.model.dto.UpdateRouteDto;
+import com.veer.route.model.exception.RouteNotFoundException;
+import com.veer.route.repository.RouteRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 public class RouteServiceImpl implements RouteService {
@@ -20,13 +19,11 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public ResponseRouteDto createRoute(CreateRouteDto createRouteDto) {
-        if (repository.findById(createRouteDto.getId()).isPresent()) {
-            throw new RouteAlreadyExistsException(
-                "Route " + createRouteDto.getId() + " already exists"
-            );
-        }
+
         Route route = RouteMapper.toEntity(createRouteDto);
+
         Route savedRoute = repository.save(route);
+
         return RouteMapper.toResponseRouteDto(savedRoute);
     }
 

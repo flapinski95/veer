@@ -30,6 +30,5 @@ public class UpdateRouteDto {
     private Boolean isPublic;
 
     private Double rating;
-
 }
 

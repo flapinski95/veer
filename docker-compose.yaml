@@ -20,36 +20,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # mongo:
-  #   image: mongo:6
-  #   container_name: veer-mongo
-  #   restart: unless-stopped
-  #   ports:
-  #     - "27028:27017"
-  #   volumes:
-  #     - mongo-data:/data/db
-  #   networks:
-  #     - veer
-  #   healthcheck:
-  #     test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-
-  # redis:
-  #   image: redis:7
-  #   container_name: veer-redis
-  #   restart: unless-stopped
-  #   ports:
-  #     - "6389:6379"
-  #   networks:
-  #     - veer
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 5s
-  #     timeout: 3s
-  #     retries: 5
-
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
     container_name: veer-keycloak
@@ -74,15 +44,48 @@ services:
       - postgres
     networks:
       - veer
-
   gateway:
     build: ./services/gateway
     container_name: veer-gateway
     restart: always
     ports:
       - "3101:3001"
+    env_file:
+      - ./services/gateway/.env
     depends_on:
       - keycloak
+    networks:
+      - veer
+
+  user-service:
+    build: ./services/veer-user
+    container_name: veer-user-service
+    restart: always
+    # no ports exposed for the internal user service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: veer_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    depends_on:
+      - postgres
+    networks:
+      - veer
+  veer-route:
+    build: ./services/veer-route
+    container_name: veer-route
+    ports:
+      - "3003:3003"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: veer_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - postgres
     networks:
       - veer
 

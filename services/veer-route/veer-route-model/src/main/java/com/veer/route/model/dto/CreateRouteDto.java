@@ -16,9 +16,9 @@ import java.util.Map;
 @AllArgsConstructor
 public class CreateRouteDto {
 
-    @NotBlank
-    @Size(max = 36)
-    private String id;
+//    @NotBlank
+//    @Size(max = 36)
+//    private String id;
 
     @Size(max = 36)
     private String createdBy;

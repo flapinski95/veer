@@ -3,14 +3,15 @@ package com.veer.route.service;
 import com.veer.route.model.Route;
 import com.veer.route.model.dto.CreateRouteDto;
 import com.veer.route.model.dto.ResponseRouteDto;
-import com.veer.route.model.dto.UpdateRouteDto;
+
+import java.util.UUID;
 
 public class RouteMapper {
 
     public static Route toEntity(CreateRouteDto createRouteDto) {
         return Route.builder()
-            .id(createRouteDto.getId())
-            .createdBy(createRouteDto.getCreatedBy())
+                .id(UUID.randomUUID().toString())
+                .createdBy(createRouteDto.getCreatedBy())
             .points(createRouteDto.getPoints())
             .name(createRouteDto.getName())
             .description(createRouteDto.getDescription())
