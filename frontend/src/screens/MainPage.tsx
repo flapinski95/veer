@@ -1,17 +1,34 @@
-// src/screens/MainPage.js
 import React from 'react';
-import { View, Button } from 'react-native';
+import { View, Button, StyleSheet } from 'react-native';
 import MapView from '../components/Map';
 
-// Dodajemy prop onLogout, która jest przekazywana z App.js
 export default function MainPage({ onLogout }) {
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <MapView />
-      {/* Dodajemy przycisk wylogowania, umieszczając go np. na górze mapy */}
-      <View style={{ position: 'absolute', bottom: 50, right: 10, zIndex: 10 }}>
-        <Button title="Wyloguj" onPress={onLogout} />
+      {/* Przycisk wylogowania w prawym dolnym rogu */}
+      <View style={styles.logoutButtonContainer}>
+        <Button title="Wyloguj" onPress={onLogout} color="#FF3B30" />
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    logoutButtonContainer: {
+        position: 'absolute',
+        bottom: 40,
+        right: 20,
+        zIndex: 10,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+    }
+})
