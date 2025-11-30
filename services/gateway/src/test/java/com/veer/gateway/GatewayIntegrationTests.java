@@ -89,7 +89,9 @@ class GatewayIntegrationTests {
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
         String issuerUri = mockAuthServer.url("/realms/veer").toString();
+        String jwkSetUri = mockAuthServer.url("/realms/veer/protocol/openid-connect/certs").toString();
         registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> issuerUri);
+        registry.add("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", () -> jwkSetUri);
         registry.add("services.auth.uri", () -> "http://localhost:" + mockAuthServer.getPort());
         registry.add("services.user.uri", () -> "http://localhost:" + mockAuthServer.getPort());
     }
