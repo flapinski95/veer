@@ -1,0 +1,33 @@
+name: Backend User Service CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '17'
+
+jobs:
+  test:
+    name: User Service Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/veer-user
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+          cache-dependency-path: services/veer-user/pom.xml
+
+      - name: Run tests
+        run: mvn clean verify
+
