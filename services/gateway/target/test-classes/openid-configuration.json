@@ -1,7 +1,0 @@
-{
-  "issuer": "http://localhost/realms/veer",
-  "authorization_endpoint": "http://localhost/realms/veer/protocol/openid-connect/auth",
-  "token_endpoint": "http://localhost/realms/veer/protocol/openid-connect/token",
-  "userinfo_endpoint": "http://localhost/realms/veer/protocol/openid-connect/userinfo",
-  "jwks_uri": "http://localhost/realms/veer/protocol/openid-connect/certs"
-}
