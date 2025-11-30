@@ -9,7 +9,7 @@ import {
   ScrollView 
 } from 'react-native';
 
-import { styles } from './RoutePanel.styles';
+import { styles } from '../bottomSheet/views/RoutePanel.styles';
 
 export interface RoutePoint {
   id: string;

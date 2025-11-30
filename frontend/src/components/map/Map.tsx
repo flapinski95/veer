@@ -4,12 +4,20 @@ import Mapbox, { LocationPuck, Camera, PointAnnotation, ShapeSource, LineLayer, 
 import { MAPBOX_PUBLIC_TOKEN } from '@env';
 import * as turf from '@turf/turf';
 
+// Style
 import { styles } from './map.styles';
+
+// Komponenty
 import SearchBox, { SearchBoxHandle } from '../search/SearchBox'; 
 import { SaveRouteModal } from './SaveRouteModal';
+import { BottomPanel } from '../bottomSheet/BottomPanel';
+import { RoutesExploreView } from '../bottomSheet/views/RoutesExploreView';
+import { RouteBuilderView } from '../bottomSheet/views/RouteBuilderView';
+
+// Serwisy i Typy
 import { saveRoute } from '../../services/routeService';
 import { getSmartRoute, getNearbyAttractions, getPoiDetails, PoiDetails } from '../../services/mapboxService';
-import { RoutePanel, RoutePoint } from './RoutePanel';
+import { RoutePoint } from './RoutePanel'; // Typ RoutePoint importujemy stąd
 import { findBestInsertIndex } from '../../utils/geoUtils';
 
 Mapbox.setAccessToken(MAPBOX_PUBLIC_TOKEN || '');
@@ -20,14 +28,19 @@ const triggerHaptic = () => {
 };
 
 const MapView = () => {
+  // --- REFS ---
   const cameraRef = useRef<Camera>(null);
   const mapRef = useRef<Mapbox.MapView>(null);
   const searchBoxRef = useRef<SearchBoxHandle>(null);
 
-  // --- STANY ---
+  // --- STANY UI / MAPY ---
+  const [panelMode, setPanelMode] = useState<'EXPLORE' | 'BUILD'>('EXPLORE');
   const [isFollowingUser, setIsFollowingUser] = useState(true);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // --- STANY TRASY ---
   const [tempPoint, setTempPoint] = useState<RoutePoint | null>(null);
   const [tempPointDetails, setTempPointDetails] = useState<PoiDetails | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -37,26 +50,26 @@ const MapView = () => {
   const [routeStats, setRouteStats] = useState<{ dist: number, dur: number } | null>(null);
   const [attractions, setAttractions] = useState<{ id: string, name: string, coordinate: [number, number] }[]>([]);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // --- STANY GESTÓW (Drag & Drop) ---
-  const [isDragging, setIsDragging] = useState(false);
+  // --- STANY GESTÓW (DRAG & DROP) ---
+  const [isDragging, setIsDragging] = useState(false); // Przesuwanie istniejącego
+  const [isDraggingNewPoint, setIsDraggingNewPoint] = useState(false); // Tworzenie i przesuwanie nowego
+  
   const isDraggingRef = useRef(false);
+  const isDraggingNewPointRef = useRef(false);
+  
   const dragIndexRef = useRef<number | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const startTouch = useRef<{x: number, y: number} | null>(null);
 
-  // Synchronizacja refa ze stanem (dla wydajności w eventach dotyku)
-  useEffect(() => {
-    isDraggingRef.current = isDragging;
-  }, [isDragging]);
+  // Synchronizacja refs dla pętli zdarzeń
+  useEffect(() => { isDraggingRef.current = isDragging; }, [isDragging]);
+  useEffect(() => { isDraggingNewPointRef.current = isDraggingNewPoint; }, [isDraggingNewPoint]);
 
-  // --- PRZELICZANIE TRASY ---
+  // --- EFEKT: PRZELICZANIE TRASY ---
   useEffect(() => {
     const recalculateRoute = async () => {
-      // WAŻNE: Nie odpytuj API, gdy użytkownik wciąż trzyma punkt!
-      if (isDragging) return;
+      // Nie odpytuj API w trakcie przesuwania palcem!
+      if (isDragging || isDraggingNewPoint) return;
 
       if (waypoints.length < 2) {
         setRouteGeometry(null);
@@ -72,14 +85,17 @@ const MapView = () => {
       if (result) {
         setRouteGeometry(result.geometry);
         setRouteStats({ dist: result.distance, dur: result.duration });
+        
+        // Pobierz atrakcje przy ostatnim punkcie
         const lastPoint = waypoints[waypoints.length - 1];
         const nearby = await getNearbyAttractions(lastPoint.coordinate);
         setAttractions(nearby.filter(a => !isPointInRoute(a.coordinate)));
       }
     };
     recalculateRoute();
-  }, [waypoints, isDragging]); // Dodano isDragging, aby odpalić przeliczenie po puszczeniu punktu
+  }, [waypoints, isDragging, isDraggingNewPoint]);
 
+  // --- HELPERY ---
   const isPointInRoute = (coord: [number, number]) => {
      return waypoints.some(wp => Math.abs(wp.coordinate[0] - coord[0]) < 0.0001 && Math.abs(wp.coordinate[1] - coord[1]) < 0.0001);
   };
@@ -91,25 +107,42 @@ const MapView = () => {
     }
   };
 
-  // --- OBSŁUGA DOTYKU (KLUCZOWA LOGIKA) ---
+  // --- ZARZĄDZANIE TRYBAMI (EXPLORE vs BUILD) ---
+  
+  const startCreatingRoute = () => {
+    setPanelMode('BUILD');
+    setWaypoints([]);
+    setRouteGeometry(null);
+    setRouteStats(null);
+    setTempPoint(null);
+  };
+
+  const exitBuildMode = () => {
+    setPanelMode('EXPLORE');
+    setWaypoints([]);
+    setRouteGeometry(null);
+    setRouteStats(null);
+    setTempPoint(null);
+    setAttractions([]);
+  };
+
+  // --- OBSŁUGA DOTYKU (GESTY) ---
 
   const handleTouchStart = (e: any) => {
     const { locationX, locationY } = e.nativeEvent;
     startTouch.current = { x: locationX, y: locationY };
 
-    // Ustawiamy timer na 400ms (czas na wykrycie przytrzymania)
+    // Start timera Long Press (500ms)
     longPressTimer.current = setTimeout(async () => {
-      
+      // Jeśli jesteśmy w trybie EXPLORE, ignorujemy edycję trasy
+      if (panelMode !== 'BUILD') return;
+
       if (!mapRef.current) return;
-      
-      // Pobieramy współrzędne geograficzne pod palcem
       const coord = await mapRef.current.getCoordinateFromView([locationX, locationY]);
       const clickPoint = turf.point(coord);
+      const HIT_RADIUS = 80; // Tolerancja dotyku
 
-      // KROK 1: Sprawdź, czy kliknięto w ISTNIEJĄCY punkt (PRIORYTET)
-      // Jeśli tak, to chcemy go przesunąć, a nie tworzyć nowy.
-      const HIT_RADIUS = 80; // Tolerancja w metrach (zależy od zoomu, ale to bezpieczna wartość)
-      
+      // 1. Sprawdź, czy trafiono w ISTNIEJĄCY punkt
       const existingPointIndex = waypoints.findIndex(wp => {
         const wpPoint = turf.point(wp.coordinate);
         const dist = turf.distance(clickPoint, wpPoint, { units: 'meters' });
@@ -117,29 +150,26 @@ const MapView = () => {
       });
 
       if (existingPointIndex !== -1) {
-        // --- SCENARIUSZ A: Złapano istniejący punkt ---
+        // SCENARIUSZ A: Przesuwanie istniejącego punktu
         triggerHaptic();
         setIsDragging(true);
         dragIndexRef.current = existingPointIndex;
-        // Wychodzimy - nie tworzymy nic nowego
         return;
       }
 
-      // KROK 2: Jeśli nie trafiono w punkt, sprawdź czy trafiono w LINIĘ trasy (żeby dodać VIA point)
+      // 2. Sprawdź, czy trafiono w LINIĘ (tworzenie punktu VIA)
       let insertIndex = -1;
-
       if (waypoints.length >= 2 && Array.isArray(routeGeometry) && routeGeometry.length > 1) {
         const line = turf.lineString(routeGeometry); 
         const distance = turf.pointToLineDistance(clickPoint, line, { units: 'meters' });
 
-        // Jeśli kliknięto blisko linii (<100m)
         if (distance < 100) { 
           insertIndex = findBestInsertIndex(coord, waypoints);
         }
       }
 
       if (insertIndex !== -1) {
-        // --- SCENARIUSZ B: Tworzymy nowy punkt na linii ---
+        // SCENARIUSZ B: Tworzenie nowego punktu na trasie
         triggerHaptic();
         const newWaypoints = [...waypoints];
         newWaypoints.splice(insertIndex, 0, {
@@ -150,13 +180,12 @@ const MapView = () => {
         });
         
         setWaypoints(newWaypoints);
-        setTempPoint(null);
+        setTempPoint(null); // Czyść ewentualną czerwoną kropkę
         setTempPointDetails(null);
         
-        setIsDragging(true);
+        setIsDraggingNewPoint(true);
         dragIndexRef.current = insertIndex;
-      } 
-      // SCENARIUSZ C: Kliknięto w puste pole -> Long press nic nie robi (ewentualnie można stawiać pinezkę)
+      }
 
     }, 400); 
   };
@@ -164,8 +193,8 @@ const MapView = () => {
   const handleTouchMove = async (e: any) => {
     const { locationX, locationY } = e.nativeEvent;
 
-    // 1. Jeśli to zwykły szybki ruch (przesuwanie mapy) -> Anuluj timer long press
-    if (!isDraggingRef.current && startTouch.current) {
+    // Anuluj long press przy zwykłym przesuwaniu mapy
+    if (!isDraggingRef.current && !isDraggingNewPointRef.current && startTouch.current) {
       const dist = Math.sqrt(Math.pow(locationX - startTouch.current.x, 2) + Math.pow(locationY - startTouch.current.y, 2));
       if (dist > 10) {
         if (longPressTimer.current) clearTimeout(longPressTimer.current);
@@ -174,14 +203,13 @@ const MapView = () => {
       return;
     }
 
-    // 2. Jeśli jesteśmy w trybie PRZESUWANIA (isDragging = true) -> Aktualizuj pozycję punktu
-    if (isDraggingRef.current && dragIndexRef.current !== null && mapRef.current) {
+    // Tryb Dragging (Aktualizacja pozycji punktu)
+    if ((isDraggingRef.current || isDraggingNewPointRef.current) && dragIndexRef.current !== null && mapRef.current) {
       const newCoord = await mapRef.current.getCoordinateFromView([locationX, locationY]);
       
       setWaypoints(prev => {
         const updated = [...prev];
-        // Upewniamy się, że punkt istnieje (index jest poprawny)
-        if (updated[dragIndexRef.current!] !== undefined) {
+        if (updated[dragIndexRef.current!]) {
            updated[dragIndexRef.current!] = {
              ...updated[dragIndexRef.current!],
              coordinate: newCoord
@@ -193,24 +221,32 @@ const MapView = () => {
   };
 
   const handleTouchEnd = () => {
-    // Czyścimy timer (jeśli puszczono palec szybko - tapnięcie)
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
     startTouch.current = null;
     
-    // Jeśli byliśmy w trybie przeciągania -> kończymy go
-    if (isDraggingRef.current) {
-      setIsDragging(false); // To odblokuje useEffect i przeliczy trasę w API
-      dragIndexRef.current = null;
-    }
+    // Zakończ wszystkie tryby przeciągania
+    if (isDraggingRef.current) setIsDragging(false);
+    if (isDraggingNewPointRef.current) setIsDraggingNewPoint(false);
+    
+    dragIndexRef.current = null;
   };
 
-  // --- CRUD & LOGIKA (BEZ ZMIAN) ---
+  // --- OBSŁUGA KLIKNIĘCIA (TAP) ---
 
   const handleLocationSelected = async (coordinate: [number, number], name: string) => {
+    // Jeśli jesteśmy w trybie EXPLORE i ktoś coś wyszuka, przełączamy na BUILD
+    if (panelMode === 'EXPLORE') {
+      setPanelMode('BUILD');
+      setWaypoints([]); // Reset starej trasy
+    }
+
     setIsFollowingUser(false);
-    setTempPoint({ id: 'temp', coordinate, name, type: 'STOP' });
     searchBoxRef.current?.close();
     
+    // Ustaw punkt tymczasowy
+    setTempPoint({ id: 'temp', coordinate, name, type: 'STOP' });
+    
+    // Pobierz detale
     setIsLoadingDetails(true);
     setTempPointDetails(null);
     const details = await getPoiDetails(name, coordinate);
@@ -223,25 +259,27 @@ const MapView = () => {
   };
 
   const handleMapPress = async (e: any) => {
-    // Ignoruj kliknięcia, jeśli właśnie skończyliśmy przeciągać
-    if (isDraggingRef.current) return;
+    // Ignoruj kliknięcia podczas przeciągania lub w trybie EXPLORE (opcjonalnie)
+    if (isDraggingRef.current || isDraggingNewPointRef.current) return;
 
+    // Pobierz współrzędne
     const clickCoordinates = e.geometry.coordinates as [number, number];
-    
-    // 1. Sprawdzamy czy kliknięto w istniejący punkt (żeby nie stawiać czerwonej kropki na niebieskiej)
+    const screenPoint = [e.properties.screenPointX, e.properties.screenPointY];
+
+    // 1. Sprawdź, czy nie kliknięto w istniejący punkt (ochrona przed fat finger)
     const HIT_RADIUS = 50; 
     const clickPoint = turf.point(clickCoordinates);
     const nearestWaypointIndex = waypoints.findIndex(wp => {
       const wpPoint = turf.point(wp.coordinate);
-      const distance = turf.distance(clickPoint, wpPoint, { units: 'meters' });
-      return distance < HIT_RADIUS;
+      const dist = turf.distance(clickPoint, wpPoint, { units: 'meters' });
+      return dist < HIT_RADIUS;
     });
 
-    if (nearestWaypointIndex !== -1) return;
+    if (nearestWaypointIndex !== -1) return; // Kliknięto w punkt, ignorujemy (obsłuży to TouchStart)
 
+    // 2. Zapytaj mapę o POI pod palcem
     setIsFollowingUser(false);
     searchBoxRef.current?.close();
-    const screenPoint = [e.properties.screenPointX, e.properties.screenPointY];
 
     try {
       const features = await mapRef.current?.queryRenderedFeaturesAtPoint(
@@ -249,28 +287,32 @@ const MapView = () => {
       );
 
       if (features && features.features.length > 0) {
+        // Trafiono w POI Mapboxa
         const feature = features.features[0];
         const name = feature.properties?.name_pl || feature.properties?.name || "Wybrane miejsce";
+        
         let targetCoordinates = clickCoordinates;
         if (feature.geometry && feature.geometry.type === 'Point') {
             targetCoordinates = feature.geometry.coordinates as [number, number];
         }
+        
         handleLocationSelected(targetCoordinates, name);
       } else {
-        handleLocationSelected(clickCoordinates, "Zaznaczony punkt");
+        // Kliknięto w puste pole
+        // W trybie BUILD stawiamy czerwoną kropkę
+        if (panelMode === 'BUILD') {
+           handleLocationSelected(clickCoordinates, "Zaznaczony punkt");
+        } else {
+           // W trybie EXPLORE np. tylko chowamy klawiaturę
+           searchBoxRef.current?.close();
+        }
       }
     } catch (error) {
-      handleLocationSelected(clickCoordinates, "Zaznaczony punkt");
+      if (panelMode === 'BUILD') handleLocationSelected(clickCoordinates, "Zaznaczony punkt");
     }
   };
 
-  const handleBackToUserLocation = () => {
-    setIsFollowingUser(true);
-    setTempPoint(null);
-    if (cameraRef.current) {
-      cameraRef.current.setCamera({ zoomLevel: 14, animationDuration: 1000 });
-    }
-  };
+  // --- CRUD PUNKTÓW ---
 
   const addTempPointToRoute = () => {
     if (tempPoint) {
@@ -307,6 +349,7 @@ const MapView = () => {
     newWaypoints[index + 1] = temp;
     setWaypoints(newWaypoints);
   };
+
   const handleSaveConfirmed = async (name: string, description: string, isPublic: boolean) => {
     try {
       const pointsPayload = waypoints.map((wp, index) => ({
@@ -316,11 +359,18 @@ const MapView = () => {
       }));
       await saveRoute({ name, description, isPublic, points: pointsPayload });
       Alert.alert("Sukces", "Trasa zapisana!");
-      setWaypoints([]);
-      setAttractions([]);
       setIsModalVisible(false);
+      exitBuildMode(); // Powrót do Explore
     } catch (error) {
       Alert.alert("Błąd", "Nie udało się zapisać.");
+    }
+  };
+
+  const handleBackToUserLocation = () => {
+    setIsFollowingUser(true);
+    setTempPoint(null);
+    if (cameraRef.current) {
+      cameraRef.current.setCamera({ zoomLevel: 14, animationDuration: 1000 });
     }
   };
 
@@ -346,12 +396,11 @@ const MapView = () => {
         logoEnabled={false}
         attributionEnabled={false}
         
-        // --- BLOKADA PRZESUWANIA MAPY ---
-        // Gdy trzymamy punkt, mapa stoi w miejscu (można precyzyjnie celować punktem)
-        scrollEnabled={!isDragging} 
-        pitchEnabled={!isDragging}
-        rotateEnabled={!isDragging}
-        zoomEnabled={!isDragging}
+        // Blokada mapy podczas przesuwania punktów
+        scrollEnabled={!isDragging && !isDraggingNewPoint} 
+        pitchEnabled={!isDragging && !isDraggingNewPoint}
+        rotateEnabled={!isDragging && !isDraggingNewPoint}
+        zoomEnabled={!isDragging && !isDraggingNewPoint}
 
         onPress={handleMapPress}
         onTouchStart={handleTouchStart}
@@ -368,7 +417,7 @@ const MapView = () => {
         )}
 
         {waypoints.map((point, index) => {
-          const isDraggingThis = isDragging && dragIndexRef.current === index;
+          const isDraggingThis = (isDragging || isDraggingNewPoint) && dragIndexRef.current === index;
           const isStart = index === 0;
 
           return (
@@ -376,7 +425,7 @@ const MapView = () => {
               key={point.id} 
               id={point.id}
               coordinate={point.coordinate}
-              draggable={false} // Używamy naszego customowego systemu drag&drop
+              draggable={false}
             >
               {point.type === 'STOP' && (
                 <View style={[
@@ -402,7 +451,8 @@ const MapView = () => {
           );
         })}
 
-        {attractions.map((attr) => (
+        {/* Atrakcje (Tylko w trybie BUILD) */}
+        {panelMode === 'BUILD' && attractions.map((attr) => (
           <PointAnnotation
             key={`attr-${attr.id}`}
             id={`attr-${attr.id}`}
@@ -434,23 +484,37 @@ const MapView = () => {
         </View>
       )}
 
-      <RoutePanel 
-        waypoints={waypoints}
-        routeStats={routeStats}
-        hasTempPoint={!!tempPoint}
-        tempPointName={tempPoint?.name}
-        tempPointDetails={tempPointDetails}
-        isLoadingDetails={isLoadingDetails}
-        onCancelSelection={() => {
-            setTempPoint(null);
-            setTempPointDetails(null);
-        }}
-        onAddTempPoint={addTempPointToRoute}
-        onRemovePoint={removePoint}
-        onMoveUp={movePointUp}
-        onMoveDown={movePointDown}
-        onSave={() => setIsModalVisible(true)}
-      />
+      {/* --- PANEL DOLNY (ZALEŻNY OD TRYBU) --- */}
+      <BottomPanel isVisible={true}>
+        
+        {panelMode === 'EXPLORE' ? (
+          <RoutesExploreView 
+             onCreateRoutePress={startCreatingRoute} 
+          />
+        ) : (
+          <RouteBuilderView 
+            waypoints={waypoints}
+            routeStats={routeStats}
+            hasTempPoint={!!tempPoint}
+            tempPointName={tempPoint?.name}
+            tempPointDetails={tempPointDetails}
+            isLoadingDetails={isLoadingDetails}
+            onCancelSelection={() => {
+                setTempPoint(null);
+                setTempPointDetails(null);
+            }}
+            onAddTempPoint={addTempPointToRoute}
+            onRemovePoint={removePoint}
+            onMoveUp={movePointUp}
+            onMoveDown={movePointDown}
+            onSave={() => setIsModalVisible(true)}
+            
+            // NOWY PROP: Przekazujemy funkcję czyszczącą i zamykającą tryb
+            onCancel={exitBuildMode} 
+          />
+        )}
+
+      </BottomPanel>
 
       <SaveRouteModal 
         visible={isModalVisible}

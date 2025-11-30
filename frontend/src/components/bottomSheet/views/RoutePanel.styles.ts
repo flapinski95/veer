@@ -25,7 +25,33 @@ export const styles = StyleSheet.create({
     // Padding na dole (dla iPhone X/11/etc z paskiem home)
     paddingBottom: Platform.OS === 'ios' ? 20 : 0, 
   },
-  
+  builderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  builderTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1C1C1E',
+  },
+  closeBuilderBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F2F2F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBuilderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#8E8E93',
+    marginTop: -2, // Optyczna korekta
+  },
   // --- UCHWYT ---
   handleContainer: {
     width: '100%',
@@ -93,7 +119,7 @@ export const styles = StyleSheet.create({
   },
 
   // --- STATYSTYKI ---
-  header: {
+ header: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
