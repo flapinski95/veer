@@ -5,7 +5,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn package -DskipTests
 
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=build /app/target/gateway-0.0.1-SNAPSHOT.jar .
 EXPOSE 3001

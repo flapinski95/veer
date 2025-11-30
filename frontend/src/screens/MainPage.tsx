@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, Button, StyleSheet } from 'react-native';
-import MapView from '../components/Map';
+import MapView from '../components/map/Map';
 
 export default function MainPage({ onLogout }) {
   return (
     <View style={styles.container}>
       <MapView />
-      {/* Przycisk wylogowania w prawym dolnym rogu */}
       <View style={styles.logoutButtonContainer}>
         <Button title="Wyloguj" onPress={onLogout} color="#FF3B30" />
       </View>
