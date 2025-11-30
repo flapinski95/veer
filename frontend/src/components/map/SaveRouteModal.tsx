@@ -1,4 +1,3 @@
-// src/components/map/SaveRouteModal.tsx
 import React, { useState } from 'react';
 import {
   Modal,
@@ -7,9 +6,14 @@ import {
   TextInput,
   TouchableOpacity,
   Switch,
-  StyleSheet,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
+
+import { styles } from './SaveRouteModal.styles';
 
 interface SaveRouteModalProps {
   visible: boolean;
@@ -29,148 +33,102 @@ export const SaveRouteModal: React.FC<SaveRouteModalProps> = ({
 
   const handleSave = async () => {
     if (!name.trim()) return;
+    
+    // Zamykamy klawiaturę przed zapisem
+    Keyboard.dismiss();
+    
     setLoading(true);
     await onSave(name, description, isPublic);
     setLoading(false);
-    // Reset formularza
+    
+    // Reset formularza po sukcesie
     setName('');
     setDescription('');
     setIsPublic(false);
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Zakończono nagrywanie</Text>
-          <Text style={styles.modalSubTitle}>Podaj szczegóły trasy</Text>
+    <Modal 
+      visible={visible} 
+      transparent 
+      animationType="fade" // Fade wygląda bardziej elegancko dla modali
+      onRequestClose={onClose} // Obsługa przycisku wstecz na Androidzie
+    >
+      {/* Pozwala zamknąć klawiaturę po kliknięciu w tło */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.centeredView}>
+          
+          {/* Przesuwa modal, gdy wyskakuje klawiatura */}
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ width: '100%', alignItems: 'center' }}
+          >
+            <View style={styles.modalView}>
+              
+              {/* HEADER */}
+              <View style={styles.headerContainer}>
+                <Text style={styles.modalTitle}>Zapisz trasę</Text>
+                <Text style={styles.modalSubTitle}>Podsumuj swoją wycieczkę</Text>
+              </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Nazwa trasy (np. Spacer po plaży)"
-            value={name}
-            onChangeText={setName}
-            autoFocus
-          />
+              {/* FORMULARZ */}
+              <View style={styles.formContainer}>
+                <Text style={styles.label}>NAZWA TRASY</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="np. Spacer po Starówce"
+                  placeholderTextColor="#C7C7CC"
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="sentences"
+                />
 
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Opis (opcjonalnie)"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={3}
-          />
+                <Text style={styles.label}>OPIS (OPCJONALNIE)</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Dodaj notatki o trasie..."
+                  placeholderTextColor="#C7C7CC"
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  numberOfLines={3}
+                />
 
-          <View style={styles.switchContainer}>
-            <Text style={styles.label}>Trasa publiczna?</Text>
-            <Switch 
-              value={isPublic} 
-              onValueChange={setIsPublic}
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={isPublic ? "#007AFF" : "#f4f3f4"} 
-            />
-          </View>
+                <View style={styles.switchContainer}>
+                  <Text style={styles.switchLabel}>Trasa publiczna</Text>
+                  <Switch 
+                    value={isPublic} 
+                    onValueChange={setIsPublic}
+                    trackColor={{ false: "#E5E5EA", true: "#34C759" }} // Zielony iOS
+                    thumbColor={"#FFFFFF"} 
+                    ios_backgroundColor="#E5E5EA"
+                  />
+                </View>
+              </View>
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={onClose} style={[styles.btn, styles.btnCancel]}>
-              <Text style={styles.btnTextCancel}>Odrzuć</Text>
-            </TouchableOpacity>
+              {/* PRZYCISKI */}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={onClose} style={[styles.btn, styles.btnCancel]}>
+                  <Text style={styles.btnTextCancel}>Anuluj</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={handleSave}
-              style={[styles.btn, styles.btnSave]}
-              disabled={loading || !name.trim()}
-            >
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Zapisz trasę</Text>}
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity
+                  onPress={handleSave}
+                  style={[styles.btn, styles.btnSave, !name.trim() && { opacity: 0.5 }]} // Wygaszenie, gdy brak nazwy
+                  disabled={loading || !name.trim()}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.btnTextSave}>Zapisz</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+            </View>
+          </KeyboardAvoidingView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalView: {
-    width: '90%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 25,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 5,
-    textAlign: 'center',
-    color: '#333',
-  },
-  modalSubTitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 15,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 25,
-  },
-  label: {
-    fontSize: 16,
-    color: '#333',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  btn: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  btnCancel: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  btnSave: {
-    backgroundColor: '#007AFF',
-  },
-  btnText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  btnTextCancel: {
-    color: '#555',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
