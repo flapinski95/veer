@@ -84,6 +84,11 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        
+        // Configure appAuthRedirectScheme for react-native-app-auth
+        manifestPlaceholders = [
+            appAuthRedirectScheme: 'veer'
+        ]
     }
     signingConfigs {
         debug {
