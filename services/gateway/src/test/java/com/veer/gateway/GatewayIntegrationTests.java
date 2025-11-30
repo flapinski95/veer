@@ -17,6 +17,8 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StreamUtils;
 
+import com.veer.gateway.testutils.JwtTestUtils;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;

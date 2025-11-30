@@ -14,7 +14,7 @@ COPY veer-user-service/src ./veer-user-service/src
 
 RUN mvn clean package -DskipTests
 
-FROM    eclipse-temurin:17-jdk-alpine
+FROM    eclipse-temurin:17-jdk
 WORKDIR /app
 
 COPY   --from=build /app/veer-user-api/target/veer-user-api-0.0.1-SNAPSHOT.jar .

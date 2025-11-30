@@ -75,11 +75,26 @@ services:
     restart: always
     # no ports exposed for the internal user service
     environment:
-      POSTGRES_HOST:     postgres
-      POSTGRES_PORT:     5432
-      POSTGRES_DB:       veer_db
-      POSTGRES_USER:     admin
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: veer_db
+      POSTGRES_USER: admin
       POSTGRES_PASSWORD: secret
+    depends_on:
+      - postgres
+    networks:
+      - veer
+  veer-route:
+    build: ./services/veer-route
+    container_name: veer-route
+    # no ports exposed for the internal user service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: veer_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
       - postgres
     networks:
@@ -106,7 +121,6 @@ networks:
 volumes:
   postgres-data:
   # mongo-data:
-
 # mongo:
 #   image: mongo:6
 #   container_name: veer-mongo
@@ -135,4 +149,4 @@ volumes:
 #     test: ["CMD", "redis-cli", "ping"]
 #     interval: 5s
 #     timeout: 3s
-# 
+#

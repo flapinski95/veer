@@ -1,4 +1,4 @@
-package com.veer.gateway;
+package com.veer.gateway.testutils;
 
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -11,9 +11,7 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 
 /* Utility class for JWT generation in tests. */
 public class JwtTestUtils {
@@ -25,14 +23,16 @@ public class JwtTestUtils {
     }
 
     public static String createToken(String issuer) {
+        Map<String, Object> address = new HashMap<>();
+        address.put("country", "Poland");
         JwtEncoder encoder = TestJwtEncoders.create(keyPair);
         JwsHeader headers = JwsHeader.with(SignatureAlgorithm.RS256).build();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer) // Must match issuer in tests
                 .subject(UUID.randomUUID().toString())
                 .claim("email", "test-user@veer.com")
-                .claim("username", "test-user")
-                .claim("country", "Poland")
+                .claim("preferred_username", "test-user")
+                .claim("address", address)
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .audience(Collections.singletonList("veer-client"))

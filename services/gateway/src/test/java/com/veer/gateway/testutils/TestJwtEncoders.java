@@ -1,4 +1,4 @@
-package com.veer.gateway;
+package com.veer.gateway.testutils;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
